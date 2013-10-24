@@ -83,3 +83,56 @@ node /jenkins.*/ {
   }
 
 }
+
+node /git.*/ {
+  class { 'apt': }
+  class { 'redis': }
+  class { 'nginx': require => Class['redis'], }
+  
+  class {
+    'ruby':
+      version         => $ruby_version,
+      rubygems_update => false;
+  }
+
+  class { 'ruby::dev': require => Class['ruby'], }
+
+  if $::lsbdistcodename == 'precise' {
+    package {
+      ['build-essential','libssl-dev','libgdbm-dev','libreadline-dev',
+      'libncurses5-dev','libffi-dev','libcurl4-openssl-dev']:
+        ensure => installed;
+    }
+
+    $ruby_version = '4.9'
+
+    exec {
+      'ruby-version':
+        command     => '/usr/bin/update-alternatives --set ruby /usr/bin/ruby1.9.1',
+        user        => root,
+        logoutput   => 'on_failure';
+      'gem-version':
+        command     => '/usr/bin/update-alternatives --set gem /usr/bin/gem1.9.1',
+        user        => root,
+        logoutput   => 'on_failure';
+    }
+  } else {
+    $ruby_version = '1:1.9.3'
+  }
+  
+  class { 'mysql::server': }
+  class { 'gitlab_mysql_db': require  => Class['mysql::config'], }
+  
+  class { 'gitlab': require => [Class['nginx'],Class['gitlab_mysql_db']], }
+  class { 'gitlab_users': require => Class['gitlab'], }
+}
+
+#classes used by 'git' node definition
+class gitlab_mysql_db ( $gitlab_db_list = hiera('gitlab::mysql::db_list') ) {
+  create_resources('mysql::db', $gitlab_db_list)
+}
+
+class gitlab_users ( $gitlab_user_list = hiera('gitlab::user_list') ) {
+  $gitlab_user_list.each { |$val| create_resources('gitlab::user', $val) }
+}
+#end 'git' node classes
