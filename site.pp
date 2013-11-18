@@ -1,7 +1,9 @@
-#if ( $virtual == 'physical') and ( $bios_vendor == 'Dell Inc.') {
-#if  $bios_vendor == 'Dell Inc.' {
-#  class {'dell_openmanage':}
-#}
+node /node[0-1].openstack.tld/ {
+  class {'basenode':}
+  class {'dell_openmanage':}
+#  class {'dell_openmanage::repository':}
+#  class {'dell_openmanage::firmware::update':}
+}
 
 node /^(norman|mother|ns[0-9\.]+)/ {
   class { 'ipam': }
@@ -11,44 +13,68 @@ node /quartermaster.*/ {
   class {'quartermaster':}
 }
 
-node /^(kvm-compute-[0-9]|neutron-controller+)/ {
+node /^(kvm-compute-[0-9]+)/ {
 
   notify {"OpenStack Node: ${hostname}":}
   class {'basenode':}
   class {'basenode::dhcp2static':}
-#  class {'dell_openmanage':}
+  class {'dell_openmanage':}
 #  class {'dell_openmanage::firmware::update':}
 #  class {'packstack::yumrepo':}
+  class {'jenkins::slave':}
+}
+node /^(neutron-controller).*/{
+  class {'basenode':}
+  class {'basenode::dhcp2static':}
+  class {'jenkins::slave':}
 }
 node /^(openstack-controller).*/{
   notify {"OpenStack Node: ${hostname}":}
   class {'basenode':}
   class {'basenode::dhcp2static':}
-#  class {'dell_openmanage':}
-#  class {'dell_openmanage::firmware::update':}
+  class {'jenkins::slave':}
   class {'packstack':
     openstack_release => 'havana',
-    controller_host   => '10.21.7.8',
-    network_host      => '10.21.7.10',
-    kvm_compute_host  => '10.21.7.31,10.21.7.32,10.21.7.33,10.21.7.34,10.21.7.35'
+    controller_host   => '10.21.7.37',
+    network_host      => '10.21.7.40',
+    kvm_compute_host  => '10.21.7.30,10.21.7.31,10.21.7.32,10.21.7.33,10.21.7.34,10.21.7.35,10.21.7.36'
+  }
+
+  vcsrepo {'/usr/local/src/openstack-imaging-tools':
+    ensure   => present,
+    provider => git,
+    source   => 'git://github.com/cloudbase/windows-openstack-imaging-tools.git'
+  }
+  vcsrepo {'/usr/local/src/openstack-dev-scripts':
+    ensure   => present,
+    provider => git,
+    source   => 'git://github.com/ppouliot/openstack-dev-scripts.git', 
+  }
+  vcsrepo {'/usr/local/src/unattend-setup-scripts':
+    ensure   => present,
+    provider => git,
+    source   => 'git://github.com/cloudbase/unattended-setup-scripts.git',
   }
 }
 
 node /^(frankenstein).*/{
-#  $graphical_admin = ['blackbox',
-#                     'ipmitool',
-#
-#                     'freeipmi-tools', 
-#                     'tightvncserver', 
-#                     'freerdp',
-#                     'freerdp-x11',
-#                     'ubuntu-virt-mgmt']
-#  package {$graphical_admin:
-#    ensure => latest,
-#  }
+  $graphical_admin = ['blackbox',
+                      'ipmitool',
+                      'freeipmi-tools', 
+                      'tightvncserver', 
+                      'freerdp',
+                      'freerdp-x11',
+                      'ubuntu-virt-mgmt']
+  package {$graphical_admin:
+    ensure => latest,
+  }
 #apt::ppa { 'ppa:dotcloud/lxc-docker': }
-  class {'jenkins::slave':}
+  class {'basenode':}
+  class {'apt':}
+#  class {'jenkins::slave':}
   class {'docker':}
+  docker::pull{'ubuntu':}
+  docker::pull{'centos':}
 }
 
 
@@ -84,109 +110,169 @@ node /jenkins.*/ {
 
 }
 
-node /git.*/ {
-  class { 'apt': }
-  class { 'redis': }
-  class { 'nginx': require => Class['redis'], }
-  
-  class {
-    'ruby':
-      version         => $ruby_version,
-      rubygems_update => false;
+node /^git.*/{
+  include classes/git_server
+}
+node /^(frodobaggins).*/{
+
+#  require '::windows_common'
+
+#  class {'windows_git':}
+#  class {'windows_7zip':}
+#  class {'windows_chrome':}
+#  class {'windows_common':}
+#  class {'windows_common::configuration::disable_firewalls':}
+  #class {'windows_common::configuration::ntp':}
+#  class {'windows_common::configuration::enable_auto_update':}
+  class{'petools':}
+  exec {'install-chocolatey':
+    command  => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
+    provider => powershell,
   }
 
-  class { 'ruby::dev': require => Class['ruby'], }
+}
+node /^(docker[0-9]).*/{
+  class {'docker':}
+  docker::pull{'base':}
+  docker::pull{'centos':}
+}
+node /^(index.docker).*/{
+  class {'docker::registry':}
+}
+node /(001ec*).*/ {
+  class {'basenode':}
+  class {'dell_openmanage':}
+  class {'dell_openmanage::firmware::update':}
+  class {'jenkins::slave':} 
+}
+#node /git.*/{
+#include gitlab
+#}
+node /vpn.*/ {
+#  class {'basenode':}
+#  class {'basenode::dhcp2static':}
 
-  if $::lsbdistcodename == 'precise' {
-    package {
-      ['build-essential','libssl-dev','libgdbm-dev','libreadline-dev',
-      'libncurses5-dev','libffi-dev','libcurl4-openssl-dev']:
-        ensure => installed;
-    }
-
-    $ruby_version = '4.9'
-
-    exec {
-      'ruby-version':
-        command     => '/usr/bin/update-alternatives --set ruby /usr/bin/ruby1.9.1',
-        user        => root,
-        logoutput   => 'on_failure';
-      'gem-version':
-        command     => '/usr/bin/update-alternatives --set gem /usr/bin/gem1.9.1',
-        user        => root,
-        logoutput   => 'on_failure';
-    }
-  } else {
-    $ruby_version = '1:1.9.3'
+  package {'bridge-utils':
+    ensure => latest,
   }
-  
-  class { 'mysql::server': }
-  class { 'gitlab_mysql_db': require  => Class['mysql::config'], }
-  
-  class { 'gitlab': require => [Class['nginx'],Class['gitlab_mysql_db']], }
-  
-  class { 'gitlab_clone_repos': require => Class['gitlab'], }
-  class { 'gitlab_import_repos': require => Class['gitlab_clone_repos'], }
-  class { 'gitlab_users': require => Class['gitlab_import_repos'], }
-  class { 'gitlab_add_users_to_groups': require => [Class['gitlab_import_repos'], Class['gitlab_users']], }
-  
-  # Cripple the built-in admin account after installation to avoid security issues later...
-  class { 'gitlab_cripple_admin': require => Class['gitlab_add_users_to_groups'], }
+  openvpn::server{'hypervci':
+    country      => 'US',
+    province     => 'MA',
+    city         => 'Cambridge',
+    organization => 'opentack.tld',
+    email        => 'root@openstack.tld',
+#    dev          => 'tap0',
+    local        => $::ipaddress_br0,
+#    proto        => 'tcp',
+    server       => '10.253.253.0 255.255.255.0',
+    push         => [
+#                     'route 10.21.7.0 255.255.255.0 10.253.353.1',
+                     'redirect-gateway def1 bypass-dhcp',
+                     'dhcp-option DNS 10.21.7.1',
+                     'dhcp-option DNS 8.8.8.8',
+                     'dhcp-option DNS 8.8.4.4',
+#                     'topology subnet'
+                    ],
+#    push         => ['route 10.21.7.0 255.255.255.0'],
+  }
+
+  firewall { '100 snat for network openvpn':
+    chain    => 'POSTROUTING',
+    jump     => 'MASQUERADE',
+    proto    => 'all',
+    outiface => "eth0",
+    source   => '10.253.253.0/24',
+    table    => 'nat',
+  }
+  firewall {'200 INPUT allow DNS':
+    action => accept,
+    proto  => 'udp',
+    sport  => 'domain'
+  }
+
+  openvpn::client {'ppouliot':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'nmeier':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'trogers':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'habdi':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'cloudbase':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+#  openvpn::client_specific_config {'ppouliot':
+#    server   => 'hypervci',
+#    ifconfig => '10.253.253.1 255.255.255.0',
+#    route    => ['route 10.21.7.0 255.255.255.0 10.253.253.1',
+#                'route 172.18.2.0 255.255.255.0 10.253.253.1'],
+#    redirect_gateway => true,
+#  }
+
+  class {'quagga':
+    ospfd_source => 'puppet:///extra_files/ospfd.conf',
+  }
+#  file {'/etc/quagga/zebra.conf':
+#    ensure  => file,
+#    owner   => 'quagga',
+#    group   => 'quagga',
+#    mode    => '0640',
+#    source  => 'puppet:///extra_files/zebra.conf',
+#    notify  => Service['zebra'],
+#    require => Class['quagga'],
+#    before  => Service['zebra'],
+#  }
 }
 
-#classes used by 'git' node definition
-class gitlab_mysql_db ( $gitlab_db_list = hiera('gitlab::mysql::db_list') ) {
-  create_resources('mysql::db', $gitlab_db_list)
+node /zuul.*/ {
+  class {'zuul':}
 }
-
-class gitlab_users ( $gitlab_user_list = hiera('gitlab::user_list') ) {
-  $gitlab_user_list.each { |$val| create_resources('gitlab::user', $val) }
-}
-
-class gitlab_clone_repos ( 
-  $gitlab_repo_url_base = hiera('gitlab::repo_url_base'),
-  $gitlab_repo_list = hiera('gitlab::repo_list'),
-  $repo_root = "${gitlab::gitlab_repodir}/repositories",
-) {
-  $gitlab_repo_list.each { |$groupname, $repos|
-    $repos.each { |$repo_name, $repo_source|
-      if $repo_name =~ /.*\.git$/ {
-        $real_name = $repo_name
-      } else {
-        $real_name = "${repo_name}.git"
-      }
-      vcsrepo {"${repo_root}/${groupname}/${real_name}":
-        ensure => bare,
-        provider => git,
-        source => "${gitlab_repo_url_base}${repo_source}",
-      }
-    }
+node /ironic.*/{
+  vcsrepo{'/usr/local/src/ironic':
+    ensure   => present,
+    source   => 'git://github.com/ppouliot/ironic.git',
+    provider => git,
+  }
+  vcsrepo{'/opt/ironic':
+    ensure   => present,
+    source   => 'git://github.com/openstack/ironic.git',
+    provider => git,
   }
 }
-
-class gitlab_add_users_to_groups ( $gitlab_groups_users_list = hiera('gitlab::groups_users_list') ) {
-  $gitlab_groups_users_list.each { |$groupname, $users_list|
-    $users_list.each { |$user_email|
-      gitlab::group_user { "${groupname}_${user_email}":
-        user_email => $user_email,
-        groupname  => $groupname,
-      }
-    }
+node /^(hv-compute[0-9][0-9]).*/{
+#  $path => $::path,
+  #class{'petools':}
+#  class{'windows_common::configuration::disable_firewalls':}
+#  class{'windows_common::configuration::enable_auto_update':}
+#  class{'windows_common::configuration::rdp':}
+#  class{'windows_common::configuration::ntp':}
+#  Package { provider => chocolatey }
+#  package {'puppet': ensure => installed, }
+#  package {'python.x86': ensure => installed, }
+#  package {'easy.install': ensure => installed, }
+#  package {'pip': ensure => installed, }
+#  package {'mingw': ensure => installed, }
+#  package {'chromium': ensure => installed, }
+#  package {'java.jdk': ensure => installed, }
+  notify {"Welcome ${fqdn}":}
+  case $hostname {
+    'hv-compute01':{
+        class {'petools':}
+     }
+    default: { notify{"You're not hv-compute01":}}
+    
   }
+  class {'windows_common':}
+  class {'windows_common::configuration::disable_firewalls':}
+  class {'windows_common::configuration::enable_auto_update':}
+  class {'windows_common::configuration::ntp':}
 }
-
-class gitlab_import_repos (
-  $repo_home = hiera('gitlab::gitlab_repodir'),
-) {
-  exec {'Import bare repos':
-      command     => 'bundle exec rake gitlab:import:repos RAILS_ENV=production',
-      provider    => 'shell',
-      cwd         => "${repo_home}/gitlab",
-      user        => $git_user,
-      require     => Package['bundler'],
-  }
-}
-
-class gitlab_cripple_admin () { gitlab::cripple_user {'admin@local.host': }}
-
-#end 'git' node classes
