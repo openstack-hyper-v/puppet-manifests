@@ -111,7 +111,8 @@ node /jenkins.*/ {
 }
 
 node /^git.*/{
-  include classes/git_server
+#  include classes/git_server
+  class {'gitlab_server': }
 }
 node /^(frodobaggins).*/{
 
