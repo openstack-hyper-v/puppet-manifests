@@ -108,6 +108,26 @@ node /jenkins.*/ {
     provider => 'gem',
   }
 
+# Jenkins Job Builder
+# Originating from Openstack-Infra
+# Puppet module provided by Openstack-Hyper-V
+  class {'jenkins_job_builder':}
+
+# Initial security settings.  May be adjusted later.
+  $jenkinsconfig_path = '/var/lib/jenkins/'
+  file { "${jenkinsconfig_path}config.xml":
+    ensure  => file,
+    source  => "puppet:///extra_files/jenkins/config.xml",
+  }
+
+  file { "${jenkinsconfig_path}users":
+    ensure  => directory,
+    source  => "puppet:///extra_files/jenkins/users",
+    recurse => remote,
+    replace => false,
+    purge   => false,
+  }
+
 }
 
 node /^git.*/{
