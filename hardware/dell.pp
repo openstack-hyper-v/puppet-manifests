@@ -40,5 +40,10 @@ case $manufacturer {
         notify {$msg_product:}
        # Insert M610 Classes here
       }
+      'PowerEdge R200': {
+        notify {$msg_product:}
+       # Insert M610 Classes here
+      }
+
 
    }
