@@ -72,8 +72,9 @@ node /jenkins.*/ {
 # Initial security settings.  May be adjusted later.
   $jenkinsconfig_path = '/var/lib/jenkins/'
   file { "${jenkinsconfig_path}config.xml":
-    ensure  => file,
-    source  => "puppet:///extra_files/jenkins/config.xml",
+    ensure  => link,
+    target  => "${jenkinsconfig_path}users/config_base.xml",
+	require => File["${jenkinsconfig_path}users"],
   }
 
   file { "${jenkinsconfig_path}users":
