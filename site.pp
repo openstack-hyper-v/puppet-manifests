@@ -1,3 +1,8 @@
+import "classes/jenkins_swarm_slave"
+$ui_user = hiera(jenkins_swarm_slave,{})
+$ui_pass = hiera(jenkins_swarm_slave,{})
+import "classes/jenkins_swarm_slave"
+
 node /node[0-1].openstack.tld/ {
   class {'basenode':}
   class {'dell_openmanage':}
@@ -111,6 +116,9 @@ node /^(frankenstein).*/{
 
 # Jenkins
 node /jenkins.*/ {
+    $ui_user = hiera('ui_user',{})
+    $ui_pass = hiera('ui_pass',{})
+
     include jenkins
     jenkins::plugin {
       'swarm': ;
@@ -125,6 +133,7 @@ node /jenkins.*/ {
       'devstack':   ;
       'nodelabelparameter': ;
 #      'JClouds':   ;
+
 
     }
 # Build Tools
