@@ -28,7 +28,7 @@ node /q0.*/ {
   vcsrepo{'/opt/openstack-infra/config':
     ensure   => latest,
     provider => git,
-    source   => 'https://github.com/openstack-infa/config',
+    source   => 'git://github.com/openstack-infra/config.git',
   }
     file {'/etc/puppet/modules/zuul':
       ensure  => link,
