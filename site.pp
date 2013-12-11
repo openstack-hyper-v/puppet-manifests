@@ -1,8 +1,3 @@
-import "classes/jenkins_swarm_slave"
-$ui_user = hiera(jenkins_swarm_slave,{})
-$ui_pass = hiera(jenkins_swarm_slave,{})
-import "classes/jenkins_swarm_slave"
-
 node /node[0-1].openstack.tld/ {
   class {'basenode':}
   class {'dell_openmanage':}
