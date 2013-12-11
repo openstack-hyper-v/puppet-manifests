@@ -6,7 +6,6 @@ node /node[0-1].openstack.tld/ {
 }
 
 node /^(norman|mother|ns[0-9\.]+)/ {
-  class { 'jenkins::slave' }
   class { 'ipam': }
 }
 
