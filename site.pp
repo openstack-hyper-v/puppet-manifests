@@ -9,10 +9,44 @@ node /^(norman|mother|ns[0-9\.]+)/ {
   class { 'ipam': }
 }
 
-node /quartermaster.*/ {
-  class {'quartermaster':}
-}
+#node /quartermaster.*/ {
+node /q0.*/ {
+#  class {'quartermaster':}
+  class {'network_mgmt':}
+#  network_mgmt::switch{'c3560g04':
+#    device_type     => 'cisco',
+#    access_method   => 'telnet',
+#    enable_password => 'hard24get',
+#    username        => 'puppet',
+#    user_password   => '$c1sc0',
+#  }
+#network_mgmt::port{'Gi0/13':
+# port_type => default,
+#}
 
+# This provides the zuul and pip puppet modules that we use on our openstack work
+  vcsrepo{'/opt/openstack-infra/config':
+    ensure   => latest,
+    provider => git,
+    source   => 'git://github.com/openstack-infra/config.git',
+  }
+    file {'/etc/puppet/modules/zuul':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/zuul',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/pip':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/pip',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+}
 node /^(frankenstein).*/{
   $graphical_admin = ['blackbox',
                       'ipmitool',
