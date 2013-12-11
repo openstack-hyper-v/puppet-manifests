@@ -27,7 +27,7 @@ node /q0.*/ {
 
 # This provides the zuul and pip puppet modules that we use on our openstack work
   vcsrepo{'/opt/openstack-infra/config':
-    ensure   => latest,
+    ensure   => present,
     provider => git,
     source   => 'git://github.com/openstack-infra/config.git',
   }
