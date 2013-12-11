@@ -11,7 +11,7 @@ node /^(norman|mother|ns[0-9\.]+)/ {
 
 #node /quartermaster.*/ {
 node /q0.*/ {
-#  class {'quartermaster':}
+  class {'quartermaster':}
   class {'network_mgmt':}
 #  network_mgmt::switch{'c3560g04':
 #    device_type     => 'cisco',
