@@ -24,6 +24,27 @@ node /q0.*/ {
 # port_type => default,
 #}
 
+# This provides the zuul and pip puppet modules that we use on our openstack work
+  vcsrepo{'/opt/openstack-infra/config':
+    ensure   => latest,
+    provider => git,
+    source   => 'https://github.com/openstack-infa/config',
+  }
+    file {'/etc/puppet/modules/zuul':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/zuul',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    file {'/etc/puppet/modules/pip':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/pip',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
 }
 
 
