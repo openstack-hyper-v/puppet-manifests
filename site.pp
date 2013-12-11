@@ -9,9 +9,23 @@ node /^(norman|mother|ns[0-9\.]+)/ {
   class { 'ipam': }
 }
 
-node /quartermaster.*/ {
-  class {'quartermaster':}
+#node /quartermaster.*/ {
+node /q0.*/ {
+#  class {'quartermaster':}
+  class {'network_mgmt':}
+#  network_mgmt::switch{'c3560g04':
+#    device_type     => 'cisco',
+#    access_method   => 'telnet',
+#    enable_password => 'hard24get',
+#    username        => 'puppet',
+#    user_password   => '$c1sc0',
+#  }
+#network_mgmt::port{'Gi0/13':
+# port_type => default,
+#}
+
 }
+
 
 node /^(frankenstein).*/{
   $graphical_admin = ['blackbox',
