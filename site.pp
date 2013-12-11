@@ -37,6 +37,7 @@ node /q0.*/ {
       mode    => '0644',
       target  => '/opt/openstack-infra/config/modules/zuul',
       require => Vcsrepo['/opt/openstack-infra/config'],
+    }
     file {'/etc/puppet/modules/pip':
       ensure  => link,
       owner   => 'root',
@@ -46,8 +47,6 @@ node /q0.*/ {
       require => Vcsrepo['/opt/openstack-infra/config'],
     }
 }
-
-
 node /^(frankenstein).*/{
   $graphical_admin = ['blackbox',
                       'ipmitool',
