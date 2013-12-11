@@ -49,6 +49,7 @@ node /jenkins.*/ {
       'ssh-slaves':   ;
       'stackhammer':   ;
       'devstack':   ;
+      'nodelabelparameter': ;
 #      'JClouds':   ;
 
     }
