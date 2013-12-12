@@ -305,19 +305,7 @@ node /ironic.*/{
     provider => git,
   }
 }
-node /tesinghvcompute/{
-  class {'windows_common':}
-  class {'windows_common::configuration::disable_firewalls':}
-  class {'windows_common::configuration::enable_auto_update':}
-  class {'windows_common::configuration::ntp':}
-  
-  class {'mingw':}
-  virtual_switch { 'br100':
-    notes             => 'OpenStack Compute Virtual Switch',
-    os_managed        => false,
-  }
-  
-}
+
 node /^(hv-compute[0-9][0-9]).*/{
 #  $path => $::path,
   #class{'petools':}
@@ -347,5 +335,8 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::ntp':}
   
   class {'mingw':}
-  
+  virtual_switch { 'br100':
+    notes             => 'OpenStack Compute Virtual Switch',
+    type        => Private,
+  }
 }
