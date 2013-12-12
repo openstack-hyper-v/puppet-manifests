@@ -48,8 +48,8 @@ node /q-dev-0.*/ {
     }
 }
 
-#node /quartermaster.*/ {
-node /(q0|q1).*/ {
+node /quartermaster.*/ {
+#node /(q0|q1).*/ {
   class {'jenkins::slave':}
   class {'quartermaster':}
   class {'network_mgmt':}
