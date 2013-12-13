@@ -1,3 +1,13 @@
+# @@basenode::pxefile
+node default {
+  # This gets applied to everything
+  case $kernel {
+   'Linux','Windows':{ notify {'supported kernel in our infrastructure':} }
+    default:{ notify {'unsupported kernel'} }
+  }
+}
+
+
 node /node[0-1].openstack.tld/ {
   class {'basenode':}
   class {'dell_openmanage':}
@@ -51,6 +61,7 @@ node /q-dev-0.*/ {
 node /quartermaster.*/ {
 #node /(q0|q1).*/ {
   class {'jenkins::slave':}
+  class {'basenode::ipmitools':}
   class {'quartermaster':}
   class {'network_mgmt':}
 #  network_mgmt::switch{'c3560g04':
@@ -113,7 +124,7 @@ node /^(frankenstein).*/{
 node /jenkins.*/ {
     $ui_user = hiera('ui_user',{})
     $ui_pass = hiera('ui_pass',{})
-
+  class {'basenode::ipmitools':}
     include jenkins
     jenkins::plugin {
       'swarm': ;
@@ -335,8 +346,8 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::ntp':}
   
   class {'mingw':}
-  virtual_switch { 'br100':
-    notes             => 'OpenStack Compute Virtual Switch',
-    type        => Private,
-  }
+#  virtual_switch { 'br100':
+#    notes             => 'OpenStack Compute Virtual Switch',
+#    type        => Private,
+#  }
 }
