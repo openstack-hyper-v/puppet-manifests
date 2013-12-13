@@ -1,9 +1,11 @@
 # @@basenode::pxefile
 node default {
+  ''include hardware/dell
+
   # This gets applied to everything
   case $kernel {
    'Linux','Windows':{ notify {'supported kernel in our infrastructure':} }
-    default:{ notify {'unsupported kernel'} }
+    default:{ notify {'unsupported kernel':} }
   }
 }
 

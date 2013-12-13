@@ -1,7 +1,10 @@
 case $manufacturer {
   'Dell Inc.':{
-   
-    notify {"${hostname" is a Dell!":}
+    include dell_openmanage
+    include basenode::ipmitools
+
+    notify {"${hostname} is a Dell!":
+    }
     if $ipaddress =~ /([001-254\.])/{ 
       $octet1 => $1
       $octet2 => $2
