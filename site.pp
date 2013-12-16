@@ -107,7 +107,35 @@ node /quartermaster.*/ {
       source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
+
+# Hyper-V compute Nodes
+   file { [
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ad',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-10-e9',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-44-cb-0a',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-51',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-43-97',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-72-bc',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-36',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-8a',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-9e',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-3b',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-c3',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-33-e1',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+#     content => template('quartermaster/pxefile.erb'),
+#      source  => "puppet:///extra_files/packstack.pxe",
+      source  => "puppet:///extra_files/packstack-dell.pxe",
+      require => Class['quartermaster'],
 }
+
+
 
 node /^(frankenstein).*/{
   $graphical_admin = ['blackbox',
