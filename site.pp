@@ -76,25 +76,36 @@ node /quartermaster.*/ {
       group   => root,
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
-      source  => "puppet:///extra_files/kickstart/hp-compute.kickstart",
+#      source  => "puppet:///extra_files/packstack.pxe",
+      source  => "puppet:///extra_files/packstack-hp.pxe",
       require => Class['quartermaster'],
     }
 
 
 # Packstack kvm node  Pxe Files
-   file { [ '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-84',
-            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-48',
-            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-3f-08',
-            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-d1-e8-dc',
-            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-33-2c',
-            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4',
-            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-ff-ae-5a']:
+   file { [ 
+## kvm-compute01
+      '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-84',
+## kvm-compute02
+      '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-48',
+## kvm-compute03
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-3f-08',
+## kvm-compute04
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-d1-e8-dc',
+## kvm-compute05
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-33-2c',
+## kvm-compute06
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4',
+## kvm-compute07
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-ff-ae-5a']:
+
       ensure  => present,
       owner   => root,
       group   => root,
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
-      source  => "puppet:///extra_files/kickstart/centos-dell-compute.kickstart",
+#      source  => "puppet:///extra_files/packstack.pxe",
+     source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
 }
@@ -328,21 +339,32 @@ node /ironic.*/{
   }
 }
 
+
+#
+# Begin Packstack nodes
+##
+node /^(kvm-compute[0-9][0-9]).*/{
+  class{'basenode':}  
+  class{'basenode::dhcp2static':}  
+  class{'dell_openmanage':}
+  class{'jenkins::slave': }
+#  class{'packstack:'}  
+}
+node /^(openstack-controller).*/{
+  class{'basenode':}  
+  class{'basenode::dhcp2static':}  
+  class{'jenkins::slave': }
+#  class{'packstack:'}  
+}
+node /^(network-controller).*/{
+  class{'basenode':}  
+  class{'basenode::dhcp2static':}  
+  class{'jenkins::slave': }
+#  class{'packstack:'}  
+}
+# End Packstack nodes
+
 node /^(hv-compute[0-9][0-9]).*/{
-#  $path => $::path,
-  #class{'petools':}
-#  class{'windows_common::configuration::disable_firewalls':}
-#  class{'windows_common::configuration::enable_auto_update':}
-#  class{'windows_common::configuration::rdp':}
-#  class{'windows_common::configuration::ntp':}
-#  Package { provider => chocolatey }
-#  package {'puppet': ensure => installed, }
-#  package {'python.x86': ensure => installed, }
-#  package {'easy.install': ensure => installed, }
-#  package {'pip': ensure => installed, }
-#  package {'mingw': ensure => installed, }
-#  package {'chromium': ensure => installed, }
-#  package {'java.jdk': ensure => installed, }
   notify {"Welcome ${fqdn}":}
   case $hostname {
     'hv-compute01':{
