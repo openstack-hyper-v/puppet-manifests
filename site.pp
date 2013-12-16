@@ -85,9 +85,9 @@ node /quartermaster.*/ {
 # Packstack kvm node  Pxe Files
    file { [ 
 ## kvm-compute01
-      '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-84',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-84',
 ## kvm-compute02
-      '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-48',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-48',
 ## kvm-compute03
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-3f-08',
 ## kvm-compute04
@@ -98,14 +98,13 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4',
 ## kvm-compute07
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-ff-ae-5a']:
-
       ensure  => present,
       owner   => root,
       group   => root,
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
-     source  => "puppet:///extra_files/packstack-dell.pxe",
+      source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
 }
@@ -377,6 +376,7 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
   class {'windows_common::configuration::ntp':}
+  class {'jenkins::slave':}
   
   #class {'mingw':}
   #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
