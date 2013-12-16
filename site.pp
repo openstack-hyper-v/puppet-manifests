@@ -1,4 +1,3 @@
-
 node default {
 #  @@quartermaster::pxe::file {$macaddress: $arp_type, $host_macaddress,}
   include 'hardware/dell'
@@ -133,6 +132,32 @@ node /quartermaster.*/ {
 #      source  => "puppet:///extra_files/packstack.pxe",
       source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
+  }
+   file { [
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ad',
+    '/srv/install/microsoft/winpe/system/menu/00-22-19-27-10-e9',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-44-cb-0a',
+    '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-51',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-43-97',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-72-bc',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-36',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-8a',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-9e',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-3b',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-c3',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-33-e1',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ee',
+    '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-33',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c']:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+#     content => template('quartermaster/pxefile.erb'),
+      content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+#     source  => "puppet:///extra_files/packstack.pxe",
+#      source  => "puppet:///s/winpe.pxe",
+  }
 }
 
 
@@ -372,20 +397,21 @@ node /ironic.*/{
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
-  class{'basenode::dhcp2static':}  
+#  class{'basenode::dhcp2static':}  
   class{'dell_openmanage':}
+#  class{'dell_openmanage':firmware::udate':}
   class{'jenkins::slave': }
 #  class{'packstack:'}  
 }
 node /^(openstack-controller).*/{
   class{'basenode':}  
-  class{'basenode::dhcp2static':}  
+#  class{'basenode::dhcp2static':}  
   class{'jenkins::slave': }
 #  class{'packstack:'}  
 }
 node /^(network-controller).*/{
   class{'basenode':}  
-  class{'basenode::dhcp2static':}  
+#  class{'basenode::dhcp2static':}  
   class{'jenkins::slave': }
 #  class{'packstack:'}  
 }
@@ -445,20 +471,20 @@ node /^(hv-compute[0-9][0-9]).*/{
 
 }
 
-node /00155d078800/ {
-  notify {"Welcome ${fqdn} you are devstack node":}
-  class {'devstack':
-    stackroot    => "/opt",
-    admin_passwd => "${operatingsystem}"
-  }
-}
+#node /00155d078800/ {
+#  notify {"Welcome ${fqdn} you are devstack node":}
+#  class {'devstack':
+#    stackroot    => "/opt",
+#    admin_passwd => "${operatingsystem}"
+#  }
+#}
 
 
-node /(devstack[0-1]).*/ {
-  notify {"Welcome ${fqdn} you are devstack node":}
-  class {'devstack':
-    stackroot    => "/opt",
-    admin_passwd => "${operatingsystem}"
-  }
+#node /(devstack[0-1]).*/ {
+#  notify {"Welcome ${fqdn} you are devstack node":}
+#  class {'devstack':
+#    stackroot    => "/opt",
+#    admin_passwd => "${operatingsystem}"
+#  }
 
-}
+#}
