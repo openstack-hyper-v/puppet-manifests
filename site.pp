@@ -26,45 +26,6 @@ node /^(norman|mother|ns[0-9\.]+)/ {
   class { 'ipam': }
 }
 
-node /q-dev-0.*/ {
-  class {'jenkins::slave':}
-  class {'quartermaster':}
-  class {'network_mgmt':}
-#  network_mgmt::switch{'c3560g04':
-#    device_type     => 'cisco',
-#    access_method   => 'telnet',
-#    enable_password => 'hard24get',
-#    username        => 'puppet',
-#    user_password   => '$c1sc0',
-#  }
-#network_mgmt::port{'Gi0/13':
-# port_type => default,
-#}
-
-# This provides the zuul and pip puppet modules that we use on our openstack work
-  vcsrepo{'/opt/openstack-infra/config':
-    ensure   => present,
-    provider => git,
-    source   => 'git://github.com/openstack-infra/config.git',
-  }
-    file {'/etc/puppet/modules/zuul':
-      ensure  => link,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      target  => '/opt/openstack-infra/config/modules/zuul',
-      require => Vcsrepo['/opt/openstack-infra/config'],
-    }
-    file {'/etc/puppet/modules/pip':
-      ensure  => link,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      target  => '/opt/openstack-infra/config/modules/pip',
-      require => Vcsrepo['/opt/openstack-infra/config'],
-    }
-}
-
 node /quartermaster.*/ {
   Quartermaster::Pxe::File <<||>>
 #node /(q0|q1).*/ {
@@ -85,11 +46,11 @@ node /quartermaster.*/ {
 #}
 
 # This provides the zuul and pip puppet modules that we use on our openstack work
-  vcsrepo{'/opt/openstack-infra/config':
-    ensure   => present,
-    provider => git,
-    source   => 'git://github.com/openstack-infra/config.git',
-  }
+    vcsrepo{'/opt/openstack-infra/config':
+      ensure   => present,
+      provider => git,
+      source   => 'git://github.com/openstack-infra/config.git',
+    }
     file {'/etc/puppet/modules/zuul':
       ensure  => link,
       owner   => 'root',
@@ -106,7 +67,38 @@ node /quartermaster.*/ {
       target  => '/opt/openstack-infra/config/modules/pip',
       require => Vcsrepo['/opt/openstack-infra/config'],
     }
+
+# Packstack Controller and Neutron Node Pxe Files
+   file { [ '/srv/tftpboot/pxelinux/pxelinux.cfg/01-d4-85-64-44-63-c6',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-1c-c1-de-e8-9a-88']:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+#     content => template('quartermaster/pxefile.erb'),
+      source  => "puppet:///extra_files/kickstart/hp-compute.kickstart",
+      require => Class['quartermaster'],
+    }
+
+
+# Packstack kvm node  Pxe Files
+   file { [ '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-84',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-48',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-3f-08',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-d1-e8-dc',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-33-2c',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4',
+            '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-ff-ae-5a']:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+#     content => template('quartermaster/pxefile.erb'),
+      source  => "puppet:///extra_files/kickstart/centos-dell-compute.kickstart",
+      require => Class['quartermaster'],
+   }
 }
+
 node /^(frankenstein).*/{
   $graphical_admin = ['blackbox',
                       'ipmitool',
@@ -364,11 +356,8 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::enable_auto_update':}
   class {'windows_common::configuration::ntp':}
   
-  class {'mingw':}
-  #virtual_switch { 'br100':
-   # notes    => 'OpenStack Compute Virtual Switch',
-    #type     => 'Private',
-  #}
+  #class {'mingw':}
+  #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
   class { 'openstack_hyper_v':
     # Services
     nova_compute              => true,
@@ -405,6 +394,16 @@ node /^(hv-compute[0-9][0-9]).*/{
 #  }
 
 }
+
+node /00155d078800/ {
+  notify {"Welcome ${fqdn} you are devstack node":}
+  class {'devstack':
+    stackroot    => "/opt",
+    admin_passwd => "${operatingsystem}"
+  }
+}
+
+
 node /(devstack[0-1]).*/ {
   notify {"Welcome ${fqdn} you are devstack node":}
   class {'devstack':
