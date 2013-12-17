@@ -11,8 +11,9 @@
 
 
 node default {
+# Need to enable stored configs to use this
 #  @@quartermaster::pxe::file {$macaddress: $arp_type, $host_macaddress,}
-  include 'hardware/dell'
+#  include 'hardware/dell'
 
   # This gets applied to everything
   case $kernel {
@@ -555,6 +556,12 @@ node /^(hv-compute[0-9][0-9]).*/{
 #  }
 
 #}
+node /^(c3130g01).*/ {
+  notify {"${hostname} is a switch":}
+}
+node /^(c3130g02).*/ {
+  notify {"${hostname} is a switch":}
+}
 
 node /^(c3560g01).*/ {
   notify {"${hostname} is a switch":}
