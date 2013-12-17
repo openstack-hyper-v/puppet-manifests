@@ -628,6 +628,6 @@ node /^(c3560g03).*/ {
   interface { $trunkports:
     description => "Trunk port",
     mode        => trunk,
-    allowd_trunk_vlans => "500-1000",
+    allowed_trunk_vlans => "500,1000",
   }
 } 
