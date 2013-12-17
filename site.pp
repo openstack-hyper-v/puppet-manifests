@@ -6,6 +6,7 @@
      }
       default: { notify {"${kernel} doesn't require this":} }
     }
+  }
 
 
 node default {
