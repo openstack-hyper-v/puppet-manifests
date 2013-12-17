@@ -1,3 +1,13 @@
+  case $kernel {
+    'Windows':{
+      Jenkins::Slave{
+        install_java       => false,
+        manage_slave_user => false, 
+     }
+      default: { notify {"${kernel} doesn't require this":} }
+    }
+
+
 node default {
 #  @@quartermaster::pxe::file {$macaddress: $arp_type, $host_macaddress,}
   include 'hardware/dell'
