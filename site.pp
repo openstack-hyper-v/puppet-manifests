@@ -191,7 +191,7 @@ node /quartermaster.*/ {
       target  => '/srv/install/microsoft/winpe/system/en_microsoft_hyper-v_server_2012_r2_x64_dvd_2708236.iso.cmd',
 #     source  => "puppet:///extra_files/packstack.pxe",
 #      source  => "puppet:///s/winpe.pxe",
-      require => Class['quartermaster':],
+      require => Class['quartermaster'],
   }
 }
 
