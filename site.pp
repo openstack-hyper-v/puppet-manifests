@@ -556,6 +556,15 @@ node /^(hv-compute[0-9][0-9]).*/{
 
 #}
 
+node /^(c3560g01).*/ {
+  notify {"${hostname} is a switch":}
+}
+node /^(c3560g02).*/ {
+  notify {"${hostname} is a switch":}
+}
+node /^(c3560g04).*/ {
+  notify {"${hostname} is a switch":}
+}
 node /^(c3560g03).*/ {
   #
   #
@@ -609,9 +618,9 @@ node /^(c3560g03).*/ {
     native_vlan => 3,
   }
   
-#  interface { $trunkports:
-#    description => "Trunk port",
-#    mode        => trunk,
-#    allowd_trunk_vlans => "500-1000",
-#  }
+  interface { $trunkports:
+    description => "Trunk port",
+    mode        => trunk,
+    allowd_trunk_vlans => "500-1000",
+  }
 } 
