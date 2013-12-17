@@ -554,3 +554,63 @@ node /^(hv-compute[0-9][0-9]).*/{
 #  }
 
 #}
+
+node /^(c3560g03).*/ {
+  #
+  #
+  #
+  
+  
+  $ge = 'GigabitEthernet0/'
+  
+  $accessports = [
+    "${ge}19",
+    "${ge}21",
+    "${ge}23",
+    "${ge}25",
+    "${ge}27",
+    "${ge}29",
+    "${ge}31",
+    "${ge}33",
+    "${ge}35",
+    "${ge}37",
+    "${ge}39",
+    "${ge}41",
+    "${ge}43",
+    "${ge}45",
+    "${ge}47",
+  ] 
+  #
+  #
+  #
+  
+  $trunkports = [ 
+    "${ge}20",
+    "${ge}22",
+    "${ge}24",
+    "${ge}26",
+    "${ge}28",
+    "${ge}30",
+    "${ge}32",
+    "${ge}34",
+    "${ge}36",
+    "${ge}38",
+    "${ge}40",
+    "${ge}42",
+    "${ge}44",
+    "${ge}46",
+    "${ge}48",
+  ]
+  
+  interface { $accessports:
+    description => "Access port",
+    mode        => access,
+    native_vlan => 3,
+  }
+  
+  interface { $trunkports:
+    description => "Trunk port",
+    mode        => trunk,
+    allowd_trunk_vlans => "500,1000",
+  }
+} 
