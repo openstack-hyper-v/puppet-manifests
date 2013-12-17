@@ -1,13 +1,13 @@
-  case $kernel {
-    'Windows':{
-      Jenkins::Slave{
-        install_java       => false,
-        manage_slave_user => false, 
-       }
-    }
-    default: { notify {"${kernel} does not require this":}
-    }
-  }
+ # case $kernel {
+ #   'Windows':{
+ #     Jenkins::Slave{
+ #       install_java       => false,
+ #       manage_slave_user => false, 
+ #      }
+ #   }
+ #   default: { notify {"${kernel} does not require this":}
+ #   }
+ # }
 
 
 node default {
@@ -121,7 +121,7 @@ node /quartermaster.*/ {
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
-      source  => "puppet:///extra_files/packstack-dell.en1.pxe",
+      source  => "puppet:///extra_files/packstack-dell.em1.pxe",
 #      source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
