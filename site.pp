@@ -121,7 +121,8 @@ node /quartermaster.*/ {
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
-      source  => "puppet:///extra_files/packstack-dell.pxe",
+      source  => "puppet:///extra_files/packstack-dell.en1.pxe",
+#      source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
 ## kvm-compute07
@@ -134,8 +135,8 @@ node /quartermaster.*/ {
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
-#      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
-      source  => "puppet:///extra_files/packstack-dell.pxe",
+      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
+#      source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
 
@@ -181,14 +182,14 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ee.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-33.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
-#     ensure  => present,
-      ensure  => link,
+     ensure  => present,
+#      ensure  => link,
       owner   => root,
       group   => root,
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
-#     content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
-      target  => '/srv/install/microsoft/winpe/system/en_microsoft_hyper-v_server_2012_r2_x64_dvd_2708236.iso.cmd',
+     content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+#      target  => '/srv/install/microsoft/winpe/system/en_microsoft_hyper-v_server_2012_r2_x64_dvd_2708236.iso.cmd',
 #     source  => "puppet:///extra_files/packstack.pxe",
 #      source  => "puppet:///s/winpe.pxe",
       require => Class['quartermaster'],
@@ -603,14 +604,14 @@ node /^(c3560g03).*/ {
   ]
   
   interface { $accessports:
-    description => "Access port",
+    description => "Access port ${name} ",
     mode        => access,
     native_vlan => 3,
   }
   
-  interface { $trunkports:
-    description => "Trunk port",
-    mode        => trunk,
-    allowd_trunk_vlans => "500,1000",
-  }
+#  interface { $trunkports:
+#    description => "Trunk port",
+#    mode        => trunk,
+#    allowd_trunk_vlans => "500-1000",
+#  }
 } 
