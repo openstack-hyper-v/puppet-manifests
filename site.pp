@@ -94,9 +94,7 @@ node /quartermaster.*/ {
 ## kvm-compute05
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-33-2c',
 ## kvm-compute06
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4',
-## kvm-compute07
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-ff-ae-5a']:
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4']:
       ensure  => present,
       owner   => root,
       group   => root,
@@ -104,6 +102,19 @@ node /quartermaster.*/ {
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
       source  => "puppet:///extra_files/packstack-dell.pxe",
+      require => Class['quartermaster'],
+   }
+## kvm-compute07
+# Interface is eth0 and not em1
+# Currently supplying a different kickstart
+   file { '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-ff-ae-5a':
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+#     content => template('quartermaster/pxefile.erb'),
+#      source  => "puppet:///extra_files/packstack.pxe",
+      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
       require => Class['quartermaster'],
    }
 
@@ -397,7 +408,7 @@ node /ironic.*/{
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
-  class{'basenode::dhcp2static':}  
+#  class{'basenode::dhcp2static':}  
   class{'dell_openmanage':}
 #  class{'dell_openmanage':firmware::udate':}
   class{'jenkins::slave': }
