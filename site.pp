@@ -5,7 +5,7 @@
         manage_slave_user => false, 
        }
     }
-      default: { notify {"${kernel} does not require this":} }
+    default: { notify {"${kernel} does not require this":}
     }
   }
 
