@@ -397,11 +397,11 @@ node /ironic.*/{
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
-#  class{'basenode::dhcp2static':}  
+  class{'basenode::dhcp2static':}  
   class{'dell_openmanage':}
 #  class{'dell_openmanage':firmware::udate':}
   class{'jenkins::slave': }
-#  class{'packstack:'}  
+  class{'packstack::yumrepo':}  
 }
 node /^(openstack-controller).*/{
   class{'basenode':}  
@@ -431,11 +431,11 @@ node /^(openstack-controller).*/{
   }
 
 }
-node /^(network-controller).*/{
+node /^(neutron-controller).*/{
   class{'basenode':}  
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave': }
-#  class{'packstack:'}  
+  class{'packstack::yumrepo':}  
 }
 # End Packstack nodes
 
