@@ -66,6 +66,14 @@ node /quartermaster.*/ {
       target  => '/opt/openstack-infra/config/modules/pip',
       require => Vcsrepo['/opt/openstack-infra/config'],
     }
+    file {'/srv/install/kickstart':
+      ensure  => directory,
+      recurse => true,
+      owner   => 'www-data',
+      group   => 'www-data',
+      mode    => '0644',
+      source  => 'puppet:///extra_files/kickstart',
+    }
 
 # Packstack Controller and Neutron Node Pxe Files
    file { [ '/srv/tftpboot/pxelinux/pxelinux.cfg/01-d4-85-64-44-63-c6',
@@ -141,7 +149,7 @@ node /quartermaster.*/ {
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
-      source  => "puppet:///extra_files/packstack-dell.pxe",
+      source  => "puppet:///extra_files/winpe.pxe",
       require => Class['quartermaster'],
   }
    file { [
@@ -408,6 +416,15 @@ node /ironic.*/{
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
+  case $hostname {
+    'kvm-compute07':{
+#     class{'basenode::dhcp2static':}  
+      package {'srvadmin-racadm4':
+        ensure => latest,
+      }
+    }
+    default: { notify {"${hostname} doesn't require these":} }
+  }
 #  class{'basenode::dhcp2static':}  
   class{'dell_openmanage':}
 #  class{'dell_openmanage':firmware::udate':}
