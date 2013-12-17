@@ -132,7 +132,8 @@ node /quartermaster.*/ {
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
 #      source  => "puppet:///extra_files/packstack.pxe",
-      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
+#      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
+      source  => "puppet:///extra_files/packstack-dell.pxe",
       require => Class['quartermaster'],
    }
 
@@ -178,14 +179,17 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ee.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-33.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
-      ensure  => present,
+#     ensure  => present,
+      ensure  => link,
       owner   => root,
       group   => root,
       mode    => '0644',
 #     content => template('quartermaster/pxefile.erb'),
-      content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+#     content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+      target  => '/srv/install/microsoft/winpe/system/en_microsoft_hyper-v_server_2012_r2_x64_dvd_2708236.iso.cmd',
 #     source  => "puppet:///extra_files/packstack.pxe",
 #      source  => "puppet:///s/winpe.pxe",
+      require => Class['quartermaster':],
   }
 }
 
