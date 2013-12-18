@@ -434,20 +434,12 @@ node /ironic.*/{
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
-  case $hostname {
-    'kvm-compute07':{
-#     class{'basenode::dhcp2static':}  
-      package {'srvadmin-racadm4':
-        ensure => latest,
-      }
-    }
-    default: { notify {"${hostname} doesn't require these":} }
-  }
-#  class{'basenode::dhcp2static':}  
+  class{'basenode::dhcp2static':}  
   class{'dell_openmanage':}
 #  class{'dell_openmanage':firmware::udate':}
   class{'jenkins::slave': }
-  class{'packstack::yumrepo':}  
+  class{'packstack::yumrepo':}
+
 }
 node /^(openstack-controller).*/{
   class{'basenode':}  
@@ -498,7 +490,11 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
   class {'windows_common::configuration::ntp':}
-  class {'jenkins::slave':}
+  class {'java': distribution => 'jre' }
+  class {'jenkins::slave': 
+    install_java => false,
+    require      => Class['java'],
+  }
   
   #class {'mingw':}
   #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
@@ -595,11 +591,8 @@ node /^(c3560g03).*/ {
     "${ge}41",
     "${ge}43",
     "${ge}45",
-    "${ge}47",
+    "${ge}47"
   ] 
-  #
-  #
-  #
   
   $trunkports = [ 
     "${ge}20",
@@ -616,18 +609,19 @@ node /^(c3560g03).*/ {
     "${ge}42",
     "${ge}44",
     "${ge}46",
-    "${ge}48",
+    "${ge}48"
   ]
   
   interface { $accessports:
     description => "Access port ${name} ",
     mode        => access,
-    native_vlan => 3,
+    native_vlan => 3
   }
   
   interface { $trunkports:
     description => "Trunk port",
+    encapsulation => 'dot1q',
     mode        => trunk,
-    allowed_trunk_vlans => "500,1000",
+    allowed_trunk_vlans => "500-1000"
   }
 } 
