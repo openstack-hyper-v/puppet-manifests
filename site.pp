@@ -223,8 +223,8 @@ node /^(frankenstein).*/{
 
 # Jenkins
 node /jenkins.*/ {
-    $ui_user = hiera('ui_user',{})
-    $ui_pass = hiera('ui_pass',{})
+#    $ui_user = hiera('ui_user',{})
+#    $ui_pass = hiera('ui_pass',{})
   class {'basenode::ipmitools':}
     include jenkins
     jenkins::plugin {
@@ -263,11 +263,11 @@ node /jenkins.*/ {
 
 # Initial security settings.  May be adjusted later.
   $jenkinsconfig_path = '/var/lib/jenkins/'
-  file { "${jenkinsconfig_path}config.xml":
-    ensure  => link,
-    target  => "${jenkinsconfig_path}users/config_base.xml",
-	require => File["${jenkinsconfig_path}users"],
-  }
+$  file { "${jenkinsconfig_path}config.xml":
+$    ensure  => link,
+$    target  => "${jenkinsconfig_path}users/config_base.xml",
+$	require => File["${jenkinsconfig_path}users"],
+$  }
 
   file { "${jenkinsconfig_path}users":
     ensure  => directory,
