@@ -240,7 +240,8 @@ node /jenkins.*/ {
       'devstack':   ;
       'nodelabelparameter': ;
 #      'JClouds':   ;
-
+      'nodelabelparameter': ;
+      'parameterized-trigger': ;
 
     }
 # Build Tools
