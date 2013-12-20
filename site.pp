@@ -141,8 +141,17 @@ node /quartermaster.*/ {
       require => Class['quartermaster'],
    }
 
-# Hyper-V compute Nodes
+# Hyper-V compute Nodes, First 9 records for Rack1
    file { [
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-d4-85-64-44-02-94',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-c8-8a',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-d8-a2',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-6d-dc',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-fd-c6',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-6d-cc',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-0e-2c',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-68-b5-99-c8-dc-1c',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-68-b5-99-c8-ed-e6',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ad',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-10-e9',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-44-cb-0a',
@@ -168,6 +177,15 @@ node /quartermaster.*/ {
       require => Class['quartermaster'],
   }
    file { [
+    '/srv/install/microsoft/winpe/system/menu/d4-85-64-44-02-94.cmd',
+    '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-c8-8a.cmd',
+    '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-d8-a2.cmd',
+    '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-6d-dc.cmd',
+    '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-fd-c6.cmd',
+    '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-6d-cc.cmd',
+    '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-0e-2c.cmd',
+    '/srv/install/microsoft/winpe/system/menu/68-b5-99-c8-dc-1c.cmd',
+    '/srv/install/microsoft/winpe/system/menu/68-b5-99-c8-ed-e6.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ad.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-10-e9.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-44-cb-0a.cmd',
