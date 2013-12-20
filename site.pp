@@ -571,8 +571,8 @@ node /^(hv-compute[0-9][0-9]).*/{
     live_migration_networks   => undef,
     # Virtual Switch
     virtual_switch_name       => 'br100',
-    virtual_switch_address    => $::ipaddress_ethernet_3,
-    virtual_switch_os_managed => true,
+    virtual_switch_address    => '192.168.55.55',
+    virtual_switch_os_managed => false,
     # Others
     purge_nova_config         => true,
     verbose                   => false,
