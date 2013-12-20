@@ -537,6 +537,7 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
   class {'windows_common::configuration::ntp':}
+  class {'windows_common::configuration::rdp':}
   class {'java': distribution => 'jre' }
   class {'jenkins::slave': 
     install_java      => false,
