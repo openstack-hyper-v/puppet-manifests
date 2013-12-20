@@ -539,8 +539,9 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::ntp':}
   class {'java': distribution => 'jre' }
   class {'jenkins::slave': 
-    install_java => false,
-    require      => Class['java'],
+    install_java      => false,
+    require           => Class['java'],
+    manage_slave_user => false,
   }
   
   #class {'mingw':}
