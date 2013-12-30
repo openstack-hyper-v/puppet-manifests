@@ -79,6 +79,70 @@ node /quartermaster.*/ {
       target  => '/opt/openstack-infra/config/modules/pip',
       require => Vcsrepo['/opt/openstack-infra/config'],
     }
+    file {'/etc/puppet/modules/openstack_project':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/openstack_project',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/ssh':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/ssh',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/recheckwatch':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/recheckwatch',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/sudoers':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/sudoers',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/exim':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/exim',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/snmpd':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/snmpd',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/iptables':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/iptables',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
+    file {'/etc/puppet/modules/unattended_upgrades':
+      ensure  => link,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      target  => '/opt/openstack-infra/config/modules/unattended_upgrades',
+      require => Vcsrepo['/opt/openstack-infra/config'],
+    }
     file {'/srv/install/kickstart':
       ensure  => directory,
       recurse => true,
@@ -167,7 +231,7 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-90-1d',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-91-1c',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ad',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-10-e9',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-10-e7',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-44-cb-0a',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-51',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-43-97',
@@ -215,7 +279,7 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-90-1d.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-91-1c.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ad.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-22-19-27-10-e9.cmd',
+    '/srv/install/microsoft/winpe/system/menu/00-22-19-27-10-e7.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-44-cb-0a.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-51.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-43-97.cmd',
@@ -309,11 +373,16 @@ node /jenkins.*/ {
 
 # Initial security settings.  May be adjusted later.
   $jenkinsconfig_path = '/var/lib/jenkins/'
-$  file { "${jenkinsconfig_path}config.xml":
-$    ensure  => link,
-$    target  => "${jenkinsconfig_path}users/config_base.xml",
-$	require => File["${jenkinsconfig_path}users"],
-$  }
+#  file { "${jenkinsconfig_path}config.xml":
+#    ensure  => link,
+#    target  => "${jenkinsconfig_path}users/config_base.xml",
+#	require => File["${jenkinsconfig_path}users"],
+#  }
+  file { "${jenkinsconfig_path}config.xml":
+    ensure  => link,
+    target  => "${jenkinsconfig_path}users/config_base.xml",
+	require => File["${jenkinsconfig_path}users"],
+  }
 
   file { "${jenkinsconfig_path}users":
     ensure  => directory,
@@ -355,15 +424,6 @@ node /^(docker[0-9]).*/{
 node /^(index.docker).*/{
   class {'docker::registry':}
 }
-node /(001ec*).*/ {
-  class {'basenode':}
-  class {'dell_openmanage':}
-  class {'dell_openmanage::firmware::update':}
-  class {'jenkins::slave':} 
-}
-#node /git.*/{
-#include gitlab
-#}
 node /vpn.*/ {
 #  class {'basenode':}
 #  class {'basenode::dhcp2static':}
@@ -460,7 +520,19 @@ node /vpn.*/ {
 }
 
 node /zuul.*/ {
-  class {'zuul':}
+# class {'zuul':}
+  class {'basenode':}
+#  class { 'openstack_project::zuul_prod':
+#    gerrit_server        => 'review.openstack.org',
+#    gerrit_user          => 'hyper-v-ci',
+#    zuul_ssh_private_key => '/home/zuul/.ssh/id_rsa',
+#    url_pattern          => 'http://logs.openstack.org/{build.parameters[LOG_PATH]}',
+#    zuul_url             => 'http://zuul.openstack.tld/p',
+#    sysadmins            => hiera('sysadmins'),
+#    statsd_host          => 'graphite.openstack.org',
+#    gearman_workers      => ['jenkins.openstack.tld'],
+#  }
+notify {"${hostname} we're manually managing for now":}
 }
 node /ironic.*/{
   vcsrepo{'/usr/local/src/ironic':
@@ -538,49 +610,66 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::enable_auto_update':}
   class {'windows_common::configuration::ntp':}
   class {'windows_common::configuration::rdp':}
+  class {'windows_openssl': }
+  class {'java': distribution => 'jre' }
   class {'java': distribution => 'jre' }
   class {'jenkins::slave': 
     install_java      => false,
     require           => Class['java'],
     manage_slave_user => false,
   }
-  
   #class {'mingw':}
   #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
-  class { 'openstack_hyper_v':
-    # Services
-    nova_compute              => true,
-    # Network
-    network_manager           => 'nova.network.manager.FlatDHCPManager',
-    # Rabbit
-    rabbit_hosts              => false,
-    rabbit_host               => 'localhost',
-    rabbit_port               => '5672',
-    rabbit_userid             => 'guest',
-    rabbit_password           => 'guest',
-    rabbit_virtual_host       => '/',
-    #General
-    image_service             => 'nova.image.glance.GlanceImageService',
-    glance_api_servers        => 'localhost:9292',
-    instances_path            => 'C:\OpenStack\instances',
-    mkisofs_cmd               => undef,
-    qemu_img_cmd              => undef,
-    auth_strategy             => 'keystone',
-    # Live Migration
-    live_migration            => false,
-    live_migration_type       => 'Kerberos',
-    live_migration_networks   => undef,
-    # Virtual Switch
-    virtual_switch_name       => 'br100',
-    virtual_switch_address    => '192.168.55.55',
-    virtual_switch_os_managed => false,
-    # Others
-    purge_nova_config         => true,
-    verbose                   => false,
-    debug                     => false
-  }
-#  class {'hyper_v::tools::create_vm':
+#  class { 'openstack_hyper_v':
+#    # Services
+#    nova_compute              => true,
+#    # Network
+#    network_manager           => 'nova.network.manager.FlatDHCPManager',
+#    # Rabbit
+#    rabbit_hosts              => false,
+#    rabbit_host               => 'localhost',
+#    rabbit_port               => '5672',
+#    rabbit_userid             => 'guest',
+#    rabbit_password           => 'guest',
+#    rabbit_virtual_host       => '/',
+#    #General
+#    image_service             => 'nova.image.glance.GlanceImageService',
+#    glance_api_servers        => '10.21.7.41:9292',
+#    #glance_api_servers        => 'localhost:9292',
+#    instances_path            => 'C:\OpenStack\instances',
+#    mkisofs_cmd               => undef,
+#    qemu_img_cmd              => undef,
+#    auth_strategy             => 'keystone',
+#    # Live Migration
+#    live_migration            => false,
+#    live_migration_type       => 'Kerberos',
+#    live_migration_networks   => undef,
+#    # Virtual Switch
+#    virtual_switch_name       => 'br100',
+#    virtual_switch_address    => '192.168.55.55',
+#    virtual_switch_os_managed => false,
+#    # Others
+#    purge_nova_config         => true,
+#    verbose                   => false,
+#    debug                     => false
 #  }
+
+  class { 'hyper_v':
+    ensure_powershell => present,
+    ensure_tools      => present,
+  }
+  class { 'hyper_v::live_migration':
+    enabled                      => true,
+    authentication_type          => 'Kerberos',
+    simultaneous_live_migrations => 3,
+  }
+  virtual_switch { 'OpenStack-Data-Network':
+    notes             => 'Switch bound to main address fact',
+    type              => External,
+    os_managed        => false,
+    interface_address => 192.168.55.55,
+  }
+  class {'openstack_hyper_v::nova_dependencies':}
 
 }
 
