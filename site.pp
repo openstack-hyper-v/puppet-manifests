@@ -623,6 +623,7 @@ node /^(hv-compute[0-9][0-9]).*/{
     require           => Class['java'],
     manage_slave_user => false,
     executors         => 1,
+    labels            = 'hyper-v',
   }
   #class {'mingw':}
   #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
