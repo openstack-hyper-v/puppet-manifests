@@ -678,6 +678,22 @@ node /^(hv-compute[0-9][0-9]).*/{
     interface_address => '192.168.55.55',
   }
   class {'openstack_hyper_v::nova_dependencies':}
+  
+  case $hostname {
+    /^hv-compute3[01]$/:{
+      vcsrepo {'C:\ProgramData\ci-overcloud-init-scripts':
+        ensure      => 'latest'
+        source      => 'https://github.com/cloudbase/ci-overcloud-init-scripts',
+        provider    => 'git',
+      }
+      file {'C:\Openstack\devstack':
+        ensure  => link,
+        target  => 'C:\ProgramData\ci-overcloud-init-scripts\scripts\HyperV\',
+        require => Vcsrepo['C:\ProgramData\ci-overcloud-init-scripts'],
+      }
+    }
+    default: 
+  }  
 }
 
 #node /00155d078800/ {
