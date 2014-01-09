@@ -679,20 +679,7 @@ node /^(hv-compute[0-9][0-9]).*/{
   }
   class {'openstack_hyper_v::nova_dependencies':}
   
-  vcsrepo {'cloudbase_scripts':
-    ensure      => 'latest',
-    path        => 'C:/ProgramData/ci-overcloud-init-scripts',
-    source      => 'https://github.com/cloudbase/ci-overcloud-init-scripts',
-    provider    => 'git',
-  }
-  file {'C:/Openstack':
-    ensure  => directory,
-  }
-  file {'C:/Openstack/devstack':
-    ensure  => link,
-    target  => 'C:/ProgramData/ci-overcloud-init-scripts/scripts/HyperV/',
-    require => [Vcsrepo["cloudbase_scripts"],File['C:/Openstack']],
-  }
+  class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
   
 }
 
