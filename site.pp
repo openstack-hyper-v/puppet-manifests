@@ -679,21 +679,21 @@ node /^(hv-compute[0-9][0-9]).*/{
   }
   class {'openstack_hyper_v::nova_dependencies':}
   
-  case $hostname {
-    /^hv-compute3[01]$/:{
-      vcsrepo {'C:\ProgramData\ci-overcloud-init-scripts':
-        ensure      => 'latest'
-        source      => 'https://github.com/cloudbase/ci-overcloud-init-scripts',
-        provider    => 'git',
-      }
-      file {'C:\Openstack\devstack':
-        ensure  => link,
-        target  => 'C:\ProgramData\ci-overcloud-init-scripts\scripts\HyperV\',
-        require => Vcsrepo['C:\ProgramData\ci-overcloud-init-scripts'],
-      }
-    }
-    default: 
-  }  
+  vcsrepo {'cloudbase_scripts':
+    ensure      => 'latest',
+    path        => 'C:/ProgramData/ci-overcloud-init-scripts',
+    source      => 'https://github.com/cloudbase/ci-overcloud-init-scripts',
+    provider    => 'git',
+  }
+  file {'C:/Openstack':
+    ensure  => directory,
+  }
+  file {'C:/Openstack/devstack':
+    ensure  => link,
+    target  => 'C:/ProgramData/ci-overcloud-init-scripts/scripts/HyperV/',
+    require => [Vcsrepo["cloudbase_scripts"],File['C:/Openstack']],
+  }
+  
 }
 
 #node /00155d078800/ {
