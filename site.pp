@@ -596,6 +596,12 @@ node /^(neutron-controller).*/{
 }
 # End Packstack nodes
 
+#node /^(hv-compute26).*/{
+#  class {'windows_openssl': }
+#  #class {'windows_python':}
+#  #class {'mingw':}
+#  class {'openstack_hyper_v::nova_dependencies':}
+#}
 node /^(hv-compute[0-9][0-9]).*/{
   notify {"Welcome ${fqdn}":}
   case $hostname {
@@ -612,11 +618,11 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::rdp':}
   class {'windows_openssl': }
   class {'java': distribution => 'jre' }
-  class {'java': distribution => 'jre' }
   class {'jenkins::slave': 
     install_java      => false,
     require           => Class['java'],
     manage_slave_user => false,
+    executors         => 1,
   }
   #class {'mingw':}
   #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
@@ -654,23 +660,23 @@ node /^(hv-compute[0-9][0-9]).*/{
 #    debug                     => false
 #  }
 
-  class { 'hyper_v':
-    ensure_powershell => present,
-    ensure_tools      => present,
-  }
-  class { 'hyper_v::live_migration':
-    enabled                      => true,
-    authentication_type          => 'Kerberos',
-    simultaneous_live_migrations => 3,
-  }
+#  class { 'hyper_v':
+#    ensure_powershell => present,
+#    ensure_tools      => present,
+#  }
+#  class { 'hyper_v::live_migration':
+#    enable                       => true,
+#    authentication_type          => 'Kerberos',
+#    simultaneous_live_migrations => 3,
+#    require                      => Class['hyper_v'],
+#  }
   virtual_switch { 'OpenStack-Data-Network':
     notes             => 'Switch bound to main address fact',
-    type              => External,
+    type              => 'External',
     os_managed        => false,
-    interface_address => 192.168.55.55,
+    interface_address => '192.168.55.55',
   }
   class {'openstack_hyper_v::nova_dependencies':}
-
 }
 
 #node /00155d078800/ {
