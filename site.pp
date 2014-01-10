@@ -536,13 +536,34 @@ node /zuul.*/ {
 #  }
 notify {"${hostname} we're manually managing for now":}
 }
-node /logs.*/ {
-  file {'/srv/logs':
+node /hawk.*/ {
+  class {'basenode':}
+  file {'/srv/hawk':
     ensure => directory,
+    owner  => 'www-data',
+    group  => 'www-data',
   }
   class {'nginx':}
-  nginx::resource::vhost { $fqdn:
-    www_root => '/srv/logs',
+  nginx::resource::vhost { 'hawk.openstack.tld':
+    www_root         => '/srv/hawk',
+    vhost_cfg_append => {
+      autoindex => on,
+    }
+  }
+}
+node /logs.*/ {
+  class {'basenode':}
+  file {'/srv/logs':
+    ensure => directory,
+    owner  => 'www-data',
+    group  => 'www-data',
+  }
+  class {'nginx':}
+  nginx::resource::vhost { 'logs.openstack.tld':
+    www_root         => '/srv/logs',
+    vhost_cfg_append => {
+      autoindex => on,
+    }
   }
 }
 node /ironic.*/{
@@ -663,7 +684,7 @@ node /^(hv-compute[0-9][0-9]).*/{
   virtual_switch { 'br100':
     notes             => 'Switch bound to main address fact',
     type              => 'External',
-    os_managed        => false,
+    os_managed        => true,
     interface_address => '192.168.55.55',
   }
   class {'openstack_hyper_v::nova_dependencies':}
