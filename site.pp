@@ -234,7 +234,7 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-10-e7',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-44-cb-0a',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-51',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-43-97',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-43-95',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-72-bc',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-36',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-8a',
@@ -245,7 +245,8 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
-      ensure  => present,
+      ensure  => absent,
+#      ensure  => present,
       owner   => root,
       group   => root,
       mode    => '0644',
@@ -282,7 +283,7 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-10-e7.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-44-cb-0a.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-51.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-43-97.cmd',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-43-95.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-72-bc.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-36.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-8a.cmd',
@@ -294,6 +295,7 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-33.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
      ensure  => present,
+#      ensure  => absent,
 #      ensure  => link,
       owner   => root,
       group   => root,
@@ -534,6 +536,15 @@ node /zuul.*/ {
 #  }
 notify {"${hostname} we're manually managing for now":}
 }
+node /logs.*/ {
+  file {'/srv/logs':
+    ensure => directory,
+  }
+  class {'nginx':}
+  nginx::resource::vhost { $fqdn:
+    www_root => '/srv/logs',
+  }
+}
 node /ironic.*/{
   vcsrepo{'/usr/local/src/ironic':
     ensure   => present,
@@ -563,7 +574,10 @@ node /^(kvm-compute[0-9][0-9]).*/{
 node /^(openstack-controller).*/{
   class{'basenode':}  
 #  class{'basenode::dhcp2static':}  
-  class{'jenkins::slave': }
+  class{'jenkins::slave':
+    executors => 40,
+  }
+
   class {'packstack':
     openstack_release => 'havana',
     controller_host   => '10.21.7.41',
@@ -576,15 +590,25 @@ node /^(openstack-controller).*/{
     provider => git,
     source   => 'git://github.com/cloudbase/windows-openstack-imaging-tools.git'
   }
-  vcsrepo {'/usr/local/src/openstack-dev-scripts':
+  vcsrepo {'/usr/local/src/openstack-dev-scripts-ppouliot':
     ensure   => present,
     provider => git,
     source   => 'git://github.com/ppouliot/openstack-dev-scripts.git',
+  }
+  vcsrepo {'/usr/local/src/openstack-dev-scripts':
+    ensure   => present,
+    provider => git,
+    source   => 'git://github.com/cloudbase/openstack-dev-scripts.git',
   }
   vcsrepo {'/usr/local/src/unattend-setup-scripts':
     ensure   => present,
     provider => git,
     source   => 'git://github.com/cloudbase/unattended-setup-scripts.git',
+  }
+  vcsrepo {'/usr/local/src/ci-overcloud-init-scripts':
+    ensure   => present,
+    provider => git,
+    source   => 'git://github.com/cloudbase/ci-overcloud-init-scripts.git',
   }
 
 }
@@ -625,41 +649,6 @@ node /^(hv-compute[0-9][0-9]).*/{
     executors         => 1,
     labels            => 'hyper-v',
   }
-  #class {'mingw':}
-  #Class['mingw'] -> Class['openstack_hyper_v'] <| |> 
-#  class { 'openstack_hyper_v':
-#    # Services
-#    nova_compute              => true,
-#    # Network
-#    network_manager           => 'nova.network.manager.FlatDHCPManager',
-#    # Rabbit
-#    rabbit_hosts              => false,
-#    rabbit_host               => 'localhost',
-#    rabbit_port               => '5672',
-#    rabbit_userid             => 'guest',
-#    rabbit_password           => 'guest',
-#    rabbit_virtual_host       => '/',
-#    #General
-#    image_service             => 'nova.image.glance.GlanceImageService',
-#    glance_api_servers        => '10.21.7.41:9292',
-#    #glance_api_servers        => 'localhost:9292',
-#    instances_path            => 'C:\OpenStack\instances',
-#    mkisofs_cmd               => undef,
-#    qemu_img_cmd              => undef,
-#    auth_strategy             => 'keystone',
-#    # Live Migration
-#    live_migration            => false,
-#    live_migration_type       => 'Kerberos',
-#    live_migration_networks   => undef,
-#    # Virtual Switch
-#    virtual_switch_name       => 'br100',
-#    virtual_switch_address    => '192.168.55.55',
-#    virtual_switch_os_managed => false,
-#    # Others
-#    purge_nova_config         => true,
-#    verbose                   => false,
-#    debug                     => false
-#  }
 
 #  class { 'hyper_v':
 #    ensure_powershell => present,
@@ -671,7 +660,7 @@ node /^(hv-compute[0-9][0-9]).*/{
 #    simultaneous_live_migrations => 3,
 #    require                      => Class['hyper_v'],
 #  }
-  virtual_switch { 'OpenStack-Data-Network':
+  virtual_switch { 'br100':
     notes             => 'Switch bound to main address fact',
     type              => 'External',
     os_managed        => false,
@@ -682,14 +671,6 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
   
 }
-
-#node /00155d078800/ {
-#  notify {"Welcome ${fqdn} you are devstack node":}
-#  class {'devstack':
-#    stackroot    => "/opt",
-#    admin_passwd => "${operatingsystem}"
-#  }
-#}
 
 
 #node /(devstack[0-1]).*/ {
