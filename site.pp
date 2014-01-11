@@ -245,8 +245,8 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
-      ensure  => absent,
-#      ensure  => present,
+#      ensure  => absent,
+      ensure  => present,
       owner   => root,
       group   => root,
       mode    => '0644',
@@ -538,6 +538,7 @@ notify {"${hostname} we're manually managing for now":}
 }
 node /hawk.*/ {
   class {'basenode':}
+  class {'jenkins::slave':}
   file {'/srv/hawk':
     ensure => directory,
     owner  => 'www-data',
@@ -553,10 +554,18 @@ node /hawk.*/ {
 }
 node /logs.*/ {
   class {'basenode':}
+  class {'jenkins::slave':}
   file {'/srv/logs':
     ensure => directory,
-    owner  => 'www-data',
+    owner  => 'logs',
     group  => 'www-data',
+  }
+  user {'logs':
+    ensure => present,
+    comment => 'log user',
+    home    => '/srv/logs',
+    shell   => '/bin/bash',
+    require => File['/srv/logs'],
   }
   class {'nginx':}
   nginx::resource::vhost { 'logs.openstack.tld':
@@ -585,12 +594,23 @@ node /ironic.*/{
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
-  class{'basenode::dhcp2static':}  
   class{'dell_openmanage':}
 #  class{'dell_openmanage':firmware::udate':}
   class{'jenkins::slave': }
   class{'packstack::yumrepo':}
-
+  case $hostname {
+    'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06':{ $data_interface = 'em2' }
+    'kvm-compute07':{ $data_interface = 'eth1' }
+    default: { notify {"This isn't for ${hostname}":}
+    }
+  }
+  file {"/etc/sysconfig/network-scripts/ifcfg-${data_interface}":
+    ensure => file,
+    owner  => '0',
+    group  => '0',
+    mode   => '0644',
+    source => "puppet:///modules/packstack/ifcfg-${data_interface}",
+  }
 }
 node /^(openstack-controller).*/{
   class{'basenode':}  
@@ -641,21 +661,21 @@ node /^(neutron-controller).*/{
 }
 # End Packstack nodes
 
-#node /^(hv-compute26).*/{
+node /^(hv-compute26).*/{
 #  class {'windows_openssl': }
-#  #class {'windows_python':}
+#  class {'windows_python':}
 #  #class {'mingw':}
-#  class {'openstack_hyper_v::nova_dependencies':}
-#}
+  class {'openstack_hyper_v::nova_dependencies':}
+}
 node /^(hv-compute[0-9][0-9]).*/{
   notify {"Welcome ${fqdn}":}
-  case $hostname {
-    'hv-compute01':{
-        class {'petools':}
-     }
-    default: { notify{"You're not hv-compute01":}}
-    
-  }
+#  case $hostname {
+#    'hv-compute01':{
+#        class {'petools':}
+#     }
+#    default: { notify{"You're not hv-compute01":}}
+#  }
+
   class {'windows_common':}
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
