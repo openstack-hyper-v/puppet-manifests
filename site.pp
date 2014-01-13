@@ -578,11 +578,16 @@ node /logs.*/ {
   user {'logs':
     ensure     => present,
     comment    => 'log user',
-    home       => '/srv/logs',
+    home       => '/home/logs',
     shell      => '/bin/bash',
     managehome => true,
   }
- file { '/srv/logs/.ssh':
+  file {'/srv/logs':
+    ensure => directory,
+    owner  => 'logs',
+    group  => 'logs',
+  }
+ file { '/home/logs/.ssh':
     ensure  => directory,
     owner   => logs,
     group   => logs,
@@ -590,7 +595,7 @@ node /logs.*/ {
     require => User['logs'],
   }
 
- file { '/srv/logs/.ssh/authorized_keys2':
+ file { '/home/logs/.ssh/authorized_keys2':
     ensure  => file,
     owner   => logs,
     group   => logs,
