@@ -40,9 +40,14 @@ node /^(norman|mother|ns[0-9\.]+)/ {
 
 node /quartermaster.*/ {
   Quartermaster::Pxe::File <<||>>
-#node /(q0|q1).*/ {
+
   class {'jenkins::slave':}
   class {'basenode::ipmitools':}
+
+  # Set NTP
+  class {'ntp':
+    servers => ['bonehed.lcs.mit.edu'],
+  }
   class {'quartermaster':}
   class {'network_mgmt':}
 
@@ -335,8 +340,10 @@ node /^(frankenstein).*/{
 
 # Jenkins
 node /jenkins.*/ {
-#    $ui_user = hiera('ui_user',{})
-#    $ui_pass = hiera('ui_pass',{})
+  # Set NTP
+  class {'ntp':
+    servers => ['bonehed.lcs.mit.edu'],
+  }
   class {'basenode::ipmitools':}
     include jenkins
     jenkins::plugin {
@@ -352,7 +359,6 @@ node /jenkins.*/ {
       'devstack':   ;
       'nodelabelparameter': ;
 #      'JClouds':   ;
-      'nodelabelparameter': ;
       'parameterized-trigger': ;
 
     }
@@ -539,10 +545,18 @@ notify {"${hostname} we're manually managing for now":}
 node /hawk.*/ {
   class {'basenode':}
   class {'jenkins::slave':}
-  file {'/srv/hawk':
-    ensure => directory,
-    owner  => 'www-data',
-    group  => 'www-data',
+#  file {'/srv/hawk':
+#    ensure => directory,
+#    owner  => 'www-data',
+#    group  => 'www-data',
+#  }
+  user {'hawk':
+    ensure     => present,
+    comment    => 'IPHawk user',
+    home       => '/srv/hawk',
+    shell      => '/bin/bash',
+    password   => '$h@wk',
+    managehome => true,
   }
   class {'nginx':}
   nginx::resource::vhost { 'hawk.openstack.tld':
@@ -551,29 +565,89 @@ node /hawk.*/ {
       autoindex => on,
     }
   }
+  exec {'get-hawk-tarball':
+    command => '/usr/bin/wget -cv http://downloads.sourceforge.net/project/iphawk/iphawk/Hawk%200.6/hawk-0.6.tar.gz -O - | tar -xz',
+    creates => '/srv/hawk/hawk-0.6',
+    cwd     => '/srv/hawk/',
+    require => User['hawk'],
+  }
 }
 node /logs.*/ {
   class {'basenode':}
   class {'jenkins::slave':}
-  file {'/srv/logs':
-    ensure => directory,
-    owner  => 'logs',
-    group  => 'www-data',
-  }
   user {'logs':
-    ensure => present,
-    comment => 'log user',
-    home    => '/srv/logs',
-    shell   => '/bin/bash',
-    require => File['/srv/logs'],
+    ensure     => present,
+    comment    => 'log user',
+    home       => '/srv/logs',
+    shell      => '/bin/bash',
+    managehome => true,
   }
+ file { '/srv/logs/.ssh':
+    ensure  => directory,
+    owner   => logs,
+    group   => logs,
+    mode    => 0600,
+    require => User['logs'],
+  }
+
+ file { '/srv/logs/.ssh/authorized_keys2':
+    ensure  => file,
+    owner   => logs,
+    group   => logs,
+    mode    => 0600,
+    source  => "puppet:///extra_files/id_dsa.pub",
+    require => User['logs'],
+  }
+
+  package {'apparmor-utils':
+    ensure => latest,
+  }
+  service {'apparmor':
+    ensure => running,
+  }
+
+  file { '/etc/apparmor.d/usr.sbin.nginx':
+    ensure  => 'file',
+    group   => '0',
+    mode    => '644',
+    owner   => '0',
+    content => '# Last Modified: Mon Jan 13 12:09:16 2014
+#include <tunables/global>
+
+/usr/sbin/nginx {
+  #include <abstractions/apache2-common>
+  #include <abstractions/base>
+
+  /etc/nginx/conf.d/ r,
+  /etc/nginx/conf.d/proxy.conf r,
+  /etc/nginx/mime.types r,
+  /etc/nginx/nginx.conf r,
+  /etc/nginx/sites-available/logs.openstack.tld.conf r,
+  /etc/nginx/sites-enabled/ r,
+  /etc/ssl/openssl.cnf r,
+  /run/nginx.pid rw,
+  /srv/logs/ r,
+  /srv/logs/** r,
+  /usr/sbin/nginx mr,
+  /var/log/nginx/access.log w,
+  /var/log/nginx/error.log w,
+  /var/log/nginx/logs.openstack.tld.access.log w,
+  /var/log/nginx/logs.openstack.tld.error.log w,
+
+}',
+    require => Class['nginx'],
+    notify  => Service['apparmor'],
+  }
+
   class {'nginx':}
   nginx::resource::vhost { 'logs.openstack.tld':
     www_root         => '/srv/logs',
+    require          => User['logs'],
     vhost_cfg_append => {
       autoindex => on,
     }
   }
+
 }
 node /ironic.*/{
   vcsrepo{'/usr/local/src/ironic':
@@ -661,21 +735,13 @@ node /^(neutron-controller).*/{
 }
 # End Packstack nodes
 
-node /^(hv-compute26).*/{
+#node /^(hv-compute26).*/{
 #  class {'windows_openssl': }
 #  class {'windows_python':}
 #  #class {'mingw':}
-  class {'openstack_hyper_v::nova_dependencies':}
-}
+#  class {'openstack_hyper_v::nova_dependencies':}
+#}
 node /^(hv-compute[0-9][0-9]).*/{
-  notify {"Welcome ${fqdn}":}
-#  case $hostname {
-#    'hv-compute01':{
-#        class {'petools':}
-#     }
-#    default: { notify{"You're not hv-compute01":}}
-#  }
-
   class {'windows_common':}
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
@@ -689,18 +755,9 @@ node /^(hv-compute[0-9][0-9]).*/{
     manage_slave_user => false,
     executors         => 1,
     labels            => 'hyper-v',
+    masterurl         => 'http://jenkins.openstack.tld:8080',
   }
 
-#  class { 'hyper_v':
-#    ensure_powershell => present,
-#    ensure_tools      => present,
-#  }
-#  class { 'hyper_v::live_migration':
-#    enable                       => true,
-#    authentication_type          => 'Kerberos',
-#    simultaneous_live_migrations => 3,
-#    require                      => Class['hyper_v'],
-#  }
   virtual_switch { 'br100':
     notes             => 'Switch bound to main address fact',
     type              => 'External',
@@ -708,9 +765,7 @@ node /^(hv-compute[0-9][0-9]).*/{
     interface_address => '192.168.55.55',
   }
   class {'openstack_hyper_v::nova_dependencies':}
-  
   class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
-  
 }
 
 
