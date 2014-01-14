@@ -630,13 +630,14 @@ node /hawk.*/ {
   file {'/srv/hawk/hawk.sql':
     ensure => file,
     content => "CREATE TABLE ip (
-ip CHAR(16) NOT NULL default '0',
-hostname CHAR(255) default NULL,
-lastping INT(10) default NULL,
-PRIMARY KEY (ip),
-UNIQUE KEY ip (ip),
-KEY ip_2 (ip)) ENGINE=MYISAM;
-COMMENT='Table for last ping time of hosts;'",
+  ip CHAR(16) NOT NULL default '0',
+  hostname CHAR(255) default NULL,
+  lastping INT(10) default NULL,
+  PRIMARY KEY (ip),
+  UNIQUE KEY ip (ip),
+  KEY ip_2 (ip)
+) ENGINE=MYISAM;
+",
     owner => 'hawk',
     group => 'hawk',
     mode  => '0644',
