@@ -835,14 +835,6 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common::configuration::rdp':}
   class {'windows_openssl': }
   class {'java': distribution => 'jre' }
-  class {'jenkins::slave': 
-    install_java      => false,
-    require           => Class['java'],
-    manage_slave_user => false,
-    executors         => 1,
-    labels            => 'hyper-v',
-    masterurl         => 'http://jenkins.openstack.tld:8080',
-  }
 
   virtual_switch { 'br100':
     notes             => 'Switch bound to main address fact',
@@ -854,6 +846,15 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
   class {'openstack_hyper_v::nova_dependencies':}
   class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+
+  class {'jenkins::slave': 
+    install_java      => false,
+    require           => [Class['java'],Class['cloudbase_prep']],
+    manage_slave_user => false,
+    executors         => 1,
+    labels            => 'hyper-v',
+    masterurl         => 'http://jenkins.openstack.tld:8080',
+  }
 }
 
 
