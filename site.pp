@@ -776,7 +776,7 @@ node /^(openstack-controller).*/{
   class{'basenode':}  
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave':
-    executors => 40,
+    executors => 37,
   }
 
   class {'packstack':
