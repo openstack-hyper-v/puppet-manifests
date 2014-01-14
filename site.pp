@@ -211,6 +211,8 @@ node /quartermaster.*/ {
    }
 
 # Hyper-V compute Nodes, First 9 records for Rack1, Next 14 for Rack2
+
+# Begin Rack 1
    file { [
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-d4-85-64-44-02-94',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-c8-8a',
@@ -220,7 +222,17 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-6d-cc',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-3c-4a-92-db-0e-2c',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-68-b5-99-c8-dc-1c',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-68-b5-99-c8-ed-e6',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-68-b5-99-c8-ed-e6']:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+      source  => "puppet:///extra_files/winpe.pxe",
+      require => Class['quartermaster'],
+  }
+
+# Begin Rack 2
+   file { [
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-9e-82',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-8a-9b',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-88-cd',
@@ -234,6 +246,18 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-9e-46',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-8d-c5',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-90-1d',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-91-ec']:
+      ensure  => absent,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+      source  => "puppet:///extra_files/winpe.pxe",
+      require => Class['quartermaster'],
+  }
+# End Rack 2
+
+# Begin Rack 3
+   file { [
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-bb-91-1c',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ad',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-10-e7',
@@ -250,16 +274,15 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
-#      ensure  => absent,
       ensure  => present,
       owner   => root,
       group   => root,
       mode    => '0644',
-#     content => template('quartermaster/pxefile.erb'),
-#      source  => "puppet:///extra_files/packstack.pxe",
       source  => "puppet:///extra_files/winpe.pxe",
       require => Class['quartermaster'],
   }
+# End Rack 3 
+
    file { [
     '/srv/install/microsoft/winpe/system/menu/d4-85-64-44-02-94.cmd',
     '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-c8-8a.cmd',
@@ -269,7 +292,17 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-6d-cc.cmd',
     '/srv/install/microsoft/winpe/system/menu/3c-4a-92-db-0e-2c.cmd',
     '/srv/install/microsoft/winpe/system/menu/68-b5-99-c8-dc-1c.cmd',
-    '/srv/install/microsoft/winpe/system/menu/68-b5-99-c8-ed-e6.cmd',
+    '/srv/install/microsoft/winpe/system/menu/68-b5-99-c8-ed-e6.cmd']:
+     ensure  => present,
+     owner   => root,
+     group   => root,
+     mode    => '0644',
+     content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+     require => Class['quartermaster'],
+  }
+# End Rack1
+# Begin Rack2
+   file { [
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-9e-82.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-8a-9b.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-88-cd.cmd',
@@ -283,6 +316,17 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-9e-46.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-8d-c5.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-90-1d.cmd',
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-91-ec.cmd']:
+     ensure  => present,
+     owner   => root,
+     group   => root,
+     mode    => '0644',
+     content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+     require => Class['quartermaster'],
+  }
+# End Rack2
+# Begin Rack3
+   file { [
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-bb-91-1c.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ad.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-10-e7.cmd',
@@ -300,17 +344,11 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-33.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
      ensure  => present,
-#      ensure  => absent,
-#      ensure  => link,
-      owner   => root,
-      group   => root,
-      mode    => '0644',
-#     content => template('quartermaster/pxefile.erb'),
+     owner   => root,
+     group   => root,
+     mode    => '0644',
      content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
-#      target  => '/srv/install/microsoft/winpe/system/en_microsoft_hyper-v_server_2012_r2_x64_dvd_2708236.iso.cmd',
-#     source  => "puppet:///extra_files/packstack.pxe",
-#      source  => "puppet:///s/winpe.pxe",
-      require => Class['quartermaster'],
+     require => Class['quartermaster'],
   }
 }
 
@@ -545,11 +583,20 @@ notify {"${hostname} we're manually managing for now":}
 node /hawk.*/ {
   class {'basenode':}
   class {'jenkins::slave':}
-#  file {'/srv/hawk':
-#    ensure => directory,
-#    owner  => 'www-data',
-#    group  => 'www-data',
-#  }
+
+  package {'php5-fpm':
+    ensure => latest,
+  }
+
+  service {'php5-fpm':
+    ensure => running,
+    require => Package['php5-fpm'],
+  }
+  package {['php5-mysql','libnet-netmask-perl','libnet-ping-perl','libclass-dbi-perl','libdbd-mysql-perl']:
+    ensure => latest,
+  }
+
+
   user {'hawk':
     ensure     => present,
     comment    => 'IPHawk user',
@@ -560,7 +607,9 @@ node /hawk.*/ {
   }
   class {'nginx':}
   nginx::resource::vhost { 'hawk.openstack.tld':
-    www_root         => '/srv/hawk',
+    www_root    => '/srv/hawk/hawk-0.6/php',
+    fastcgi     => 'localhost:9000',
+    index_files => ['hawk.php','index.php','index.html'],
     vhost_cfg_append => {
       autoindex => on,
     }
@@ -570,6 +619,37 @@ node /hawk.*/ {
     creates => '/srv/hawk/hawk-0.6',
     cwd     => '/srv/hawk/',
     require => User['hawk'],
+  }
+  exec {'conf-fastcgi-nginx':
+    command => "/bin/sed -i '/^listen = \/var\/run\/php5-fpm.sock/c\listen = 127.0.0.1\:9000' /etc/php5/fpm/pool.d/www.conf",
+    cwd     => '/etc/php5/fpm/pool.d',
+    require => [Package['php5-fpm'],Class['nginx']],
+    notify  => Service['php5-fpm'],
+    unless  => "/bin/grep '^listen = 127.0.0.1\:9000' /etc/php5/fpm/pool.d/www.conf"
+  }
+  file {'/srv/hawk/hawk.sql':
+    ensure => file,
+    content => "CREATE TABLE ip (
+ip CHAR(16) NOT NULL default '0',
+hostname CHAR(255) default NULL,
+lastping INT(10) default NULL,
+PRIMARY KEY (ip),
+UNIQUE KEY ip (ip),
+KEY ip_2 (ip)) ENGINE=MYISAM;
+COMMENT='Table for last ping time of hosts;'",
+    owner => 'hawk',
+    group => 'hawk',
+    mode  => '0644',
+    require => User['hawk'],
+  }
+  class {'::mysql::server':}
+  mysql::db {'hawk':
+    user     => 'hawk',
+    password => '$h@wk',
+    host     => 'localhost',
+    grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+    sql      => '/srv/hawk/hawk.sql',
+    require  => [File['/srv/hawk/hawk.sql'],Class['mysql::server']],
   }
 }
 node /logs.*/ {
@@ -767,8 +847,10 @@ node /^(hv-compute[0-9][0-9]).*/{
     notes             => 'Switch bound to main address fact',
     type              => 'External',
     os_managed        => true,
-    interface_address => '192.168.55.55',
+    interface_address => '10.0.2.*',
   }
+
+  class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
   class {'openstack_hyper_v::nova_dependencies':}
   class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
 }
