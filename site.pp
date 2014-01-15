@@ -184,7 +184,7 @@ node /quartermaster.*/ {
 ## kvm-compute05
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-33-2c',
 ## kvm-compute06
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4']:
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-23-ae-fc-37-a4',]:
       ensure  => present,
       owner   => root,
       group   => root,
@@ -270,9 +270,6 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-9e',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-3b',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-c3',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-33-e1',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
       ensure  => present,
       owner   => root,
@@ -281,6 +278,19 @@ node /quartermaster.*/ {
       source  => "puppet:///extra_files/winpe.pxe",
       require => Class['quartermaster'],
   }
+  
+  file { [
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-33-e1',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',]:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
+      require => Class['quartermaster'],
+  }
+
 # End Rack 3 
 
    file { [
@@ -339,9 +349,6 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-9e.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-3b.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-c3.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-33-e1.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-ee.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-33.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
      ensure  => present,
      owner   => root,
@@ -583,75 +590,7 @@ notify {"${hostname} we're manually managing for now":}
 node /hawk.*/ {
   class {'basenode':}
   class {'jenkins::slave':}
-
-  package {'php5-fpm':
-    ensure => latest,
-  }
-
-  service {'php5-fpm':
-    ensure => running,
-    require => Package['php5-fpm'],
-  }
-  package {['php5-mysql','libnet-netmask-perl','libnet-ping-perl','libclass-dbi-perl','libdbd-mysql-perl']:
-    ensure => latest,
-  }
-
-
-  user {'hawk':
-    ensure     => present,
-    comment    => 'IPHawk user',
-    home       => '/srv/hawk',
-    shell      => '/bin/bash',
-    password   => '$h@wk',
-    managehome => true,
-  }
-  class {'nginx':}
-  nginx::resource::vhost { 'hawk.openstack.tld':
-    www_root    => '/srv/hawk/hawk-0.6/php',
-    fastcgi     => 'localhost:9000',
-    index_files => ['hawk.php','index.php','index.html'],
-    vhost_cfg_append => {
-      autoindex => on,
-    }
-  }
-  exec {'get-hawk-tarball':
-    command => '/usr/bin/wget -cv http://downloads.sourceforge.net/project/iphawk/iphawk/Hawk%200.6/hawk-0.6.tar.gz -O - | tar -xz',
-    creates => '/srv/hawk/hawk-0.6',
-    cwd     => '/srv/hawk/',
-    require => User['hawk'],
-  }
-  exec {'conf-fastcgi-nginx':
-    command => "/bin/sed -i '/^listen = \/var\/run\/php5-fpm.sock/c\listen = 127.0.0.1\:9000' /etc/php5/fpm/pool.d/www.conf",
-    cwd     => '/etc/php5/fpm/pool.d',
-    require => [Package['php5-fpm'],Class['nginx']],
-    notify  => Service['php5-fpm'],
-    unless  => "/bin/grep '^listen = 127.0.0.1\:9000' /etc/php5/fpm/pool.d/www.conf"
-  }
-  file {'/srv/hawk/hawk.sql':
-    ensure => file,
-    content => "CREATE TABLE ip (
-  ip CHAR(16) NOT NULL default '0',
-  hostname CHAR(255) default NULL,
-  lastping INT(10) default NULL,
-  PRIMARY KEY (ip),
-  UNIQUE KEY ip (ip),
-  KEY ip_2 (ip)
-) ENGINE=MYISAM;
-",
-    owner => 'hawk',
-    group => 'hawk',
-    mode  => '0644',
-    require => User['hawk'],
-  }
-  class {'::mysql::server':}
-  mysql::db {'hawk':
-    user     => 'hawk',
-    password => '$h@wk',
-    host     => 'localhost',
-    grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
-    sql      => '/srv/hawk/hawk.sql',
-    require  => [File['/srv/hawk/hawk.sql'],Class['mysql::server']],
-  }
+  class {'iphawk':}
 }
 node /logs.*/ {
   class {'basenode':}
@@ -703,6 +642,10 @@ node /logs.*/ {
 /usr/sbin/nginx {
   #include <abstractions/apache2-common>
   #include <abstractions/base>
+
+  capability dac_override,
+  capability setgid,
+  capability setuid,
 
   /etc/nginx/conf.d/ r,
   /etc/nginx/conf.d/proxy.conf r,
@@ -759,7 +702,7 @@ node /^(kvm-compute[0-9][0-9]).*/{
   class{'jenkins::slave': }
   class{'packstack::yumrepo':}
   case $hostname {
-    'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06':{ $data_interface = 'em2' }
+    'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06','kvm-compute08','kvm-compute09','kvm-compute10':{ $data_interface = 'em2' }
     'kvm-compute07':{ $data_interface = 'eth1' }
     default: { notify {"This isn't for ${hostname}":}
     }
@@ -826,23 +769,18 @@ node /^(neutron-controller).*/{
 #  class {'windows_python':}
 #  #class {'mingw':}
 #  class {'openstack_hyper_v::nova_dependencies':}
+#   class {'windows_common::configuration::ntp':}
 #}
 node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_common':}
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
-  class {'windows_common::configuration::ntp':}
+  class {'windows_common::configuration::ntp':
+    before => Class['windows_openssl'],
+  }
   class {'windows_common::configuration::rdp':}
   class {'windows_openssl': }
   class {'java': distribution => 'jre' }
-  class {'jenkins::slave': 
-    install_java      => false,
-    require           => Class['java'],
-    manage_slave_user => false,
-    executors         => 1,
-    labels            => 'hyper-v',
-    masterurl         => 'http://jenkins.openstack.tld:8080',
-  }
 
   virtual_switch { 'br100':
     notes             => 'Switch bound to main address fact',
@@ -854,6 +792,15 @@ node /^(hv-compute[0-9][0-9]).*/{
   class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
   class {'openstack_hyper_v::nova_dependencies':}
   class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+
+  class {'jenkins::slave': 
+    install_java      => false,
+    require           => [Class['java'],Class['cloudbase_prep']],
+    manage_slave_user => false,
+    executors         => 1,
+    labels            => 'hyper-v',
+    masterurl         => 'http://jenkins.openstack.tld:8080',
+  }
 }
 
 
