@@ -699,11 +699,14 @@ node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
   class{'dell_openmanage':}
 #  class{'dell_openmanage':firmware::udate':}
-  class{'jenkins::slave': }
+  class{'jenkins::slave':
+    labels            => 'kvm',
+    masterurl         => 'http://jenkins.openstack.tld:8080',
+  }
   class{'packstack::yumrepo':}
   case $hostname {
-    'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06','kvm-compute08','kvm-compute09','kvm-compute10':{ $data_interface = 'em2' }
-    'kvm-compute07':{ $data_interface = 'eth1' }
+    'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06':{ $data_interface = 'em2' }
+    'kvm-compute07','kvm-compute08','kvm-compute09','kvm-compute10':{ $data_interface = 'eth1' }
     default: { notify {"This isn't for ${hostname}":}
     }
   }
@@ -715,6 +718,7 @@ node /^(kvm-compute[0-9][0-9]).*/{
     source => "puppet:///modules/packstack/ifcfg-${data_interface}",
   }
 }
+
 node /^(openstack-controller).*/{
   class{'basenode':}  
 #  class{'basenode::dhcp2static':}  
