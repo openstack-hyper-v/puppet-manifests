@@ -671,31 +671,45 @@ node /logs.*/ {
   class {'nginx':}
   nginx::resource::vhost { 'logs.openstack.tld':
     www_root         => '/srv/logs',
+    use_default_location => false,
     require          => User['logs'],
     vhost_cfg_append => {
       autoindex => on,
     }
   }
-  nginx::resource::location{'xml-gz':
+  nginx::resource::location{'/':
     ensure => present,
     www_root => '/srv/logs',
-    location => '~* "\.xml\.gz"',
+    vhost    => 'logs.openstack.tld',
+  }
+  nginx::resource::location{'~* "\.xml\.gz$"':
+    ensure => present,
+    www_root => '/srv/logs',
     vhost    => 'logs.openstack.tld',
     location_cfg_append => {
-      add_header           => 'Content-Enconding gzip',
+      add_header           => 'Content-Encoding gzip',
       gzip                 => 'off',
-      types                => '{text/xml gz;}'
+      types                => '{text/xml gz;}',
     }
   }
-  nginx::resource::location{'log-txt-gz':
+  nginx::resource::location{'~* "\.html\.gz$"':
+    ensure => present,
+    www_root => '/srv/logs',
+    vhost    => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Encoding gzip',
+      gzip                 => 'off',
+      types                => '{text/html gz;}',
+    }
+  }
+  nginx::resource::location{'~* "\.(log|txt)\.gz$"':
     ensure => present,
     www_root               => '/srv/logs',
-    location               => '~* "\.(log|txt)\.gz$"',
     vhost                  => 'logs.openstack.tld',
     location_cfg_append => {
-      add_header           => 'Content-Enconding gzip',
+      add_header           => 'Content-Encoding gzip',
       gzip                 => 'off',
-      types                => '{text/plain gz;}'
+      types                => '{text/plain gz;}',
     }
   }
 }
