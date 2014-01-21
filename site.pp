@@ -662,8 +662,8 @@ node /logs.*/ {
   /var/log/nginx/error.log w,
   /var/log/nginx/logs.openstack.tld.access.log w,
   /var/log/nginx/logs.openstack.tld.error.log w,
-
-}',
+}
+',
     require => Class['nginx'],
     notify  => Service['apparmor'],
   }
@@ -676,8 +676,31 @@ node /logs.*/ {
       autoindex => on,
     }
   }
-
+  nginx::resource::location{'xml-gz':
+    ensure => present,
+    www_root => '/srv/logs',
+    location => '~* "\.xml\.gz"',
+    vhost    => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Enconding gzip',
+      gzip                 => 'off',
+      types                => '{text/xml gz;}'
+    }
+  }
+  nginx::resource::location{'log-txt-gz':
+    ensure => present,
+    www_root               => '/srv/logs',
+    location               => '~* "\.(log|txt)\.gz$"',
+    vhost                  => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Enconding gzip',
+      gzip                 => 'off',
+      types                => '{text/plain gz;}'
+    }
+  }
 }
+
+
 node /ironic.*/{
   vcsrepo{'/usr/local/src/ironic':
     ensure   => present,
@@ -691,23 +714,68 @@ node /ironic.*/{
   }
 }
 
-
 #
 # Begin Packstack nodes
 ##
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
   class{'dell_openmanage':}
-#  class{'dell_openmanage':firmware::udate':}
+#  class{'dell_openmanage::firmware::update':}
   class{'jenkins::slave':
     labels            => 'kvm',
     masterurl         => 'http://jenkins.openstack.tld:8080',
   }
-  class{'packstack::yumrepo':}
+  class {'packstack':
+    openstack_release => 'havana',
+    controller_host   => '10.21.7.41',
+    network_host      => '10.21.7.42',
+    kvm_compute_host  => '10.21.7.31,10.21.7.32,10.21.7.33,10.21.7.34,10.21.7.35,10.21.7.36,10.21.7.38',
+  }
   case $hostname {
     'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06':{ $data_interface = 'em2' }
     'kvm-compute07','kvm-compute08','kvm-compute09','kvm-compute10':{ $data_interface = 'eth1' }
     default: { notify {"This isn't for ${hostname}":}
+    }
+  }
+  case $hostname {
+    'kvm-compute08','kvm-compute09','kvm-compute10':{
+       file {'/etc/nova':
+       ensure  => directory,
+       recurse => true,
+       owner   => 'root',
+       group   => 'root',
+       mode    => '0755',
+       source  => 'puppet:///extra_files/nova',
+     }
+
+     file_line {
+      'vncserver_listen':
+        path   => '/etc/nova/nova.conf',
+        match  => "vncserver_listen=10\.21\.7\.*",
+        line   => "vncserver_listen=${ipaddress_eth0}",
+        ensure => present,
+        require => File['/etc/nova'],
+     }
+     
+     file_line {
+      'vncserver_proxyclient_address':
+        path   => '/etc/nova/nova.conf',
+        match  => "vncserver_proxyclient_address=10\.21\.7\.*",
+        line   => "vncserver_proxyclient_address=${ipaddress_eth0}",
+        ensure => present,
+        require => File['/etc/nova'],
+     }
+
+     file {'/etc/neutron':
+       ensure  => directory,
+       recurse => true,
+       owner   => 'root',
+       group   => 'root',
+       mode    => '0755',
+       source  => 'puppet:///extra_files/eth1-neutron/neutron',
+     }
+    }
+     default: { notify {"This isn't for ${hostname}":}
     }
   }
   file {"/etc/sysconfig/network-scripts/ifcfg-${data_interface}":
@@ -717,13 +785,43 @@ node /^(kvm-compute[0-9][0-9]).*/{
     mode   => '0644',
     source => "puppet:///modules/packstack/ifcfg-${data_interface}",
   }
+  case $hostname {
+    'kvm-compute08','kvm-compute09','kvm-compute10':{
+      package {['openstack-nova-compute',
+                'openstack-selinux',
+                'openstack-neutron-openvswitch',
+                'openstack-neutron-linuxbridge',
+                'python-slip',
+                'python-slip-dbus',
+                'libglade2',
+                'nagios-common',
+                'tuned',
+                'yum-plugin-priorities',
+                'system-config-firewall',
+                'telnet',
+                'nrpe',
+                'centos-release-xen',
+                'openstack-ceilometer-compute'] :
+
+        ensure => 'latest',
+      }
+      exec {'centos_release_xen_update':
+        command   => "/usr/bin/yum update -y --disablerepo=* --enablerepo=Xen4CentOS kernel",
+        logoutput => true,
+        timeout   => 0,
+      }
+    }
+    default:{
+      notify {"${fqdn} doesn't require this":}
+    }
+  }
 }
 
 node /^(openstack-controller).*/{
   class{'basenode':}  
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave':
-    executors => 37,
+    executors => 22,
   }
 
   class {'packstack':
@@ -829,9 +927,88 @@ node /^(c3560g01).*/ {
 node /^(c3560g02).*/ {
   notify {"${hostname} is a switch":}
 }
-node /^(c3560g04).*/ {
-  notify {"${hostname} is a switch":}
-}
 node /^(c3560g03).*/ {
   notify {"${hostname} is a switch":}
+}
+node /^(c3560g04).*/ {
+  notify {"${hostname} is a switch":}
 } 
+node /^(c3560g05).*/ {
+  notify {"${hostname} is a switch":}
+} 
+node /sauron.*/{ 
+
+  package {'curl':
+    ensure => latest,
+  }
+
+  class {'rabbitmq':
+    delete_guest_user => true,
+    ssl               => true,
+    ssl_cacert        => '/etc/rabbitmq/ssl/cacert.pem',
+    ssl_cert          => '/etc/rabbitmq/ssl/cert.pem',
+    ssl_key           => '/etc/rabbitmq/ssl/key.pem',
+  }
+
+  rabbitmq_user{'sensu':
+    admin => true,
+    password => 'sensu',
+  }
+  rabbitmq_vhost{'sensu':
+    ensure => present,
+  }
+
+
+  class {'redis':}
+
+  exec {'get-sensu-ca-scripts':
+    command => '/usr/bin/wget -cv wget http://sensuapp.org/docs/0.12/tools/ssl_certs.tar -O - | tar -x',
+    creates => '/tmp/ssl_certs',
+    cwd     => '/tmp',
+  }
+  file {'/tmp/ssl_certs':
+    ensure => present,
+    require => Exec['get-sensu-ca-scripts'],
+  }
+
+
+  exec {'create-sensu-certs':
+    command => '/tmp/ssl_certs/ssl_certs.sh generate',
+    cwd     => '/tmp/ssl_certs',
+    require => [Exec['get-sensu-ca-scripts'],File['/tmp/ssl_certs']],
+    logoutput => true,
+  }
+
+  file {'/etc/rabbitmq/ssl/cacert.pem':
+    ensure => present,
+    source => '/tmp/ssl_certs/sensu_ca/cacert.pem',
+    require => [File['/etc/rabbitmq/ssl'],Exec['create-sensu-certs']],
+  }
+  file {'/etc/rabbitmq/ssl/cert.pem':
+    ensure => present,
+    source => '/tmp/ssl_certs/server/cert.pem',
+    require => [File['/etc/rabbitmq/ssl'],Exec['create-sensu-certs']],
+  }
+  file {'/etc/rabbitmq/ssl/key.pem':
+    ensure => present,
+    source => '/tmp/ssl_certs/server/key.pem',
+    require => [File['/etc/rabbitmq/ssl'],Exec['create-sensu-certs']],
+  }
+
+
+
+
+
+#  class{'sensu':
+#    rabbitmq_password => 'sensu',
+#    server    => true,
+#    dashboard => true,
+#    api       => true,
+#    safe_mode => true,
+#  }
+}
+node /sandbox0[1-3].*/{
+  notify {"welcome ${fqdn}":}
+  class{'dell_openmanage':}
+  class{'dell_openmanage::firmware::update':}
+}
