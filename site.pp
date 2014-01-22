@@ -299,7 +299,7 @@ node /quartermaster.*/ {
     # sandbox02
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-75-5e',
     # sandbox03
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-c0-01',
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-c0-01']:
       ensure  => present,
       owner   => root,
       group   => root,
@@ -380,7 +380,7 @@ node /quartermaster.*/ {
    # Sandbox02
     '/srv/install/microsoft/winpe/system/menu/00-18-8b-f8-75-5e.cmd',
    # Sandbox03 
-    '/srv/install/microsoft/winpe/system/menu/00-18-8b-f8-c0-01.cmd',
+    '/srv/install/microsoft/winpe/system/menu/00-18-8b-f8-c0-01.cmd']:
      ensure  => present,
      owner   => root,
      group   => root,
