@@ -280,9 +280,26 @@ node /quartermaster.*/ {
   }
   
   file { [
+    # kvm-compute08
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-33-e1',
+    # kvm-compute09
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-ee',
+    # kvm-compute10
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-33',]:
+      ensure  => present,
+      owner   => root,
+      group   => root,
+      mode    => '0644',
+      source  => "puppet:///extra_files/packstack-dell.eth0.pxe",
+      require => Class['quartermaster'],
+  }
+  file { [
+    # sandbox01
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-bb-b7',
+    # sandbox02
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-75-5e',
+    # sandbox03
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-c0-01',
       ensure  => present,
       owner   => root,
       group   => root,
@@ -357,6 +374,21 @@ node /quartermaster.*/ {
      content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
      require => Class['quartermaster'],
   }
+  file { [
+   # Sandbox01 
+    '/srv/install/microsoft/winpe/system/menu/00-18-8b-f8-bb-b7.cmd',
+   # Sandbox02
+    '/srv/install/microsoft/winpe/system/menu/00-18-8b-f8-75-5e.cmd',
+   # Sandbox03 
+    '/srv/install/microsoft/winpe/system/menu/00-18-8b-f8-c0-01.cmd',
+     ensure  => present,
+     owner   => root,
+     group   => root,
+     mode    => '0644',
+     content => 'o:\hyper-v\2012r2\amd64\setup.exe /unattend:\\10.21.7.22\os\hyper-v\2012r2\unattend\hyper-v-2012r2-amd64.xml',
+     require => Class['quartermaster'],
+  }
+
 }
 
 
