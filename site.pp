@@ -1043,23 +1043,68 @@ node /sandbox0[1-9].*/{
     }
     'Debian':{
       notify {"${fqdn} is an openstack controller":}
-      class {'rabbitmq':
-        delete_guest_user => true,
-        default_user => '',
-        default_pass => '',
+      class{'basenode':} 
+#      class {'rabbitmq':
+#        delete_guest_user => true,
+#        default_user => '',
+#        default_pass => '',
 #       ssl               => true,
 #       ssl_cacert        => '/etc/rabbitmq/ssl/cacert.pem',
 #       ssl_cert          => '/etc/rabbitmq/ssl/cert.pem',
 #       ssl_key           => '/etc/rabbitmq/ssl/key.pem',
-      }
+#      }
 
-      rabbitmq_user{'openstack':
-        admin => true,
-        password => 'openstack',
-      }
-      rabbitmq_vhost{'openstack':
-        ensure => present,
-      }
+#      rabbitmq_user{'openstack':
+#        admin => true,
+#        password => 'openstack',
+#      }
+#      rabbitmq_vhost{'openstack':
+#        ensure => present,
+#      }
+#      class {'::mysql::server':}
+
+#      mysql::db {'keystone':
+#        user     => 'keystone',
+#        password => 'keystone',
+#        host     => 'localhost',
+#        grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+#        require  => [Class['mysql::server']],
+#      }
+#      mysql::db {'glance':
+#        user     => 'glance',
+#        password => 'glance',
+#        host     => 'localhost',
+#        grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+#        require  => [Class['mysql::server']],
+#      }
+#      mysql::db {'nova':
+#        user     => 'nova',
+#        password => 'nova',
+#        host     => 'localhost',
+#        grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+#        require  => [Class['mysql::server']],
+#      }
+#      mysql::db {'cinder':
+#        user     => 'cinder',
+#        password => 'cinder',
+#        host     => 'localhost',
+#        grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+#        require  => [Class['mysql::server']],
+#      }
+#      mysql::db {'ceilometer':
+#        user     => 'ceilometer',
+#        password => 'ceilometer',
+#        host     => 'localhost',
+#        grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+#        require  => [Class['mysql::server']],
+#      }
+#      mysql::db {'heat':
+#        user     => 'heat',
+#        password => 'heat',
+#        host     => 'localhost',
+#        grant    => ['CREATE','INSERT','SELECT','DELETE','UPDATE'],
+#        require  => [Class['mysql::server']],
+#      }
 
     }
     'Default':{
