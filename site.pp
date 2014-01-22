@@ -951,99 +951,67 @@ node /^(c3560g05).*/ {
   notify {"${hostname} is a switch":}
 } 
 node /sauron.*/{ 
-
-  package {'curl':
-    ensure => latest,
-  }
-
-  class {'rabbitmq':
-    delete_guest_user => true,
-    default_user => '',
-    default_pass => '',
-    ssl               => true,
-    ssl_cacert        => '/etc/rabbitmq/ssl/cacert.pem',
-    ssl_cert          => '/etc/rabbitmq/ssl/cert.pem',
-    ssl_key           => '/etc/rabbitmq/ssl/key.pem',
-  }
-
-  rabbitmq_user{'sensu':
-    admin => true,
-    password => 'sensu',
-  }
-  rabbitmq_vhost{'sensu':
-    ensure => present,
-  }
-
-  rabbitmq_user_permissions { 'sensu@sensu':
-    configure_permission => '.*',
-    read_permission      => '.*',
-    write_permission     => '.*',
-  }
-
-  class {'redis':}
-
-  exec {'get-sensu-ca-scripts':
-    command => '/usr/bin/wget -cv wget http://sensuapp.org/docs/0.12/tools/ssl_certs.tar -O - | tar -x',
-    creates => '/tmp/ssl_certs',
-    cwd     => '/tmp',
-  }
-  file {'/tmp/ssl_certs':
-    ensure => present,
-    require => Exec['get-sensu-ca-scripts'],
-  }
-
-
-  exec {'create-sensu-certs':
-    command => '/tmp/ssl_certs/ssl_certs.sh generate',
-    cwd     => '/tmp/ssl_certs',
-    require => [Exec['get-sensu-ca-scripts'],File['/tmp/ssl_certs']],
-    logoutput => true,
-    unless    => '/usr/bin/file /tmp/ssl_certs/sensu_ca/cacert.pem',
-  }
-
-  file {['/etc/rabbitmq/ssl/cacert.pem','/etc/sensu/ssl/cacert.pem']:
-    ensure => present,
-    source => '/tmp/ssl_certs/sensu_ca/cacert.pem',
-    require => [File['/etc/rabbitmq/ssl'],Exec['create-sensu-certs']],
-    owner => 'sensu',
-    group => 'sensu',
-    mode  => '0644',
-  }
-  file {['/etc/rabbitmq/ssl/cert.pem','/etc/sensu/ssl/cert.pem']:
-    ensure => present,
-    source => '/tmp/ssl_certs/server/cert.pem',
-    require => [File['/etc/rabbitmq/ssl'],Exec['create-sensu-certs']],
-    owner => 'sensu',
-    group => 'sensu',
-    mode  => '0644',
-  }
-  file {['/etc/rabbitmq/ssl/key.pem','/etc/sensu/ssl/key.pem']:
-    ensure => present,
-    source => '/tmp/ssl_certs/server/key.pem',
-    require => [File['/etc/rabbitmq/ssl'],Exec['create-sensu-certs']],
-    owner => 'sensu',
-    group => 'sensu',
-    mode  => '0644',
-  }
-
-
-
-
-
-  class{'sensu':
-    rabbitmq_password => 'sensu',
-    rabbitmq_host => $fqdn,
-    rabbitmq_ssl_cert_chain => '/etc/sensu/ssl/cert.pem',
-    rabbitmq_ssl_private_key => '/etc/sensu/ssl/key.pem',
-    server    => true,
-    dashboard => true,
-    api       => true,
-    client    => false,
-#    safe_mode => true,
-  }
+  class{'sensu_server':}
 }
-node /sandbox0[1-3].*/{
-  notify {"welcome ${fqdn}":}
-  class{'dell_openmanage':}
-  class{'dell_openmanage::firmware::update':}
+node /sandbox0[1-9].*/{
+
+  case $osfamily {
+    'Windows':{
+      class {'windows_common':}
+      class {'windows_common::configuration::disable_firewalls':}
+      class {'windows_common::configuration::enable_auto_update':}
+      class {'windows_common::configuration::ntp':}
+      class {'mingw':}
+
+      class { 'openstack_hyper_v':
+        # Services
+        nova_compute              => true,
+        # Network
+        network_manager           => 'nova.network.manager.FlatDHCPManager',
+       # Rabbit
+        rabbit_hosts              => false,
+        rabbit_host               => 'localhost',
+        rabbit_port               => '5672',
+        rabbit_userid             => 'guest',
+        rabbit_password           => 'guest',
+        rabbit_virtual_host       => '/',
+        #General
+        image_service             => 'nova.image.glance.GlanceImageService',
+        glance_api_servers        => 'localhost:9292',
+        instances_path            => 'C:\OpenStack\instances',
+        mkisofs_cmd               => undef,
+        qemu_img_cmd              => undef,
+        auth_strategy             => 'keystone',
+        # Live Migration
+        live_migration            => false,
+        live_migration_type       => 'Kerberos',
+        live_migration_networks   => undef,
+        # Virtual Switch
+        virtual_switch_name       => 'br100',
+        virtual_switch_address    => $::ipaddress_ethernet_2,
+        virtual_switch_os_managed => true,
+        # Others
+        purge_nova_config         => true,
+        verbose                   => false,
+        debug                     => false
+      }
+
+    }
+    'RedHat':{
+      class{'basenode':}
+      class{'dell_openmanage':}
+      class{'dell_openmanage::firmware::update':}
+      class {'packstack':
+        openstack_release => 'havana',
+        controller_host   => $ipaddress,
+        network_host      => $ipaddress,
+        kvm_compute_host  => $ipaddress,
+      }
+
+    }
+    'Debian':{}
+    'Default':{
+      notify {"${fqdn} isn't part of the sandbox":}
+    }
+  }
 }
