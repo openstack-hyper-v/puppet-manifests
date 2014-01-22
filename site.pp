@@ -300,7 +300,7 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-75-5e',
     # sandbox03
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-18-8b-f8-c0-01']:
-      ensure  => present,
+      ensure  => absent,
       owner   => root,
       group   => root,
       mode    => '0644',
@@ -1041,7 +1041,27 @@ node /sandbox0[1-9].*/{
       }
 
     }
-    'Debian':{}
+    'Debian':{
+      notify {"${fqdn} is an openstack controller":}
+      class {'rabbitmq':
+        delete_guest_user => true,
+        default_user => '',
+        default_pass => '',
+#       ssl               => true,
+#       ssl_cacert        => '/etc/rabbitmq/ssl/cacert.pem',
+#       ssl_cert          => '/etc/rabbitmq/ssl/cert.pem',
+#       ssl_key           => '/etc/rabbitmq/ssl/key.pem',
+      }
+
+      rabbitmq_user{'openstack':
+        admin => true,
+        password => 'openstack',
+      }
+      rabbitmq_vhost{'openstack':
+        ensure => present,
+      }
+
+    }
     'Default':{
       notify {"${fqdn} isn't part of the sandbox":}
     }
