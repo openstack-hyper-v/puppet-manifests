@@ -40,6 +40,11 @@ node /sandbox0[1-9].*/{
         verbose                   => false,
         debug                     => false
       }
+      
+      windows_common::remote_file{'sensu_agent_download':
+        source      => 'http://repos.sensuapp.org/msi/sensu-0.12.5-1.msi',
+        destination => 'c:/sensu_agent.msi',
+      }
 
     }
     'RedHat':{
