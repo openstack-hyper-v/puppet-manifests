@@ -43,7 +43,7 @@ node /quartermaster.*/ {
 
   class {'jenkins::slave':}
   class {'basenode::ipmitools':}
-
+  class {'sensu_server::client':}
   # Set NTP
   class {'ntp':
     servers => ['bonehed.lcs.mit.edu'],
@@ -61,6 +61,11 @@ node /quartermaster.*/ {
 #network_mgmt::port{'Gi0/13':
 # port_type => default,
 #}
+  file{'/srv/install/sensu/':
+    ensure  => directory,
+    recurse => true,
+    source  => 'puppet:///extra_files/sensu',
+  }
 
 # This provides the zuul and pip puppet modules that we use on our openstack work
     vcsrepo{'/opt/openstack-infra/config':
@@ -264,14 +269,16 @@ node /quartermaster.*/ {
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-44-cb-0a',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-22-19-27-0f-51',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-43-95',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-72-bc',
+# hv-compute29
+#    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d3-72-bc',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-36',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-8a',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-9e',
+#    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-9e',
     '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-3b',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-c3',
-    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
-      ensure  => present,
+    '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-35-c3']:
+# hv-compute38
+#   '/srv/tftpboot/pxelinux/pxelinux.cfg/01-00-1e-c9-d0-34-2c']:
+      ensure  => absent,
       owner   => root,
       group   => root,
       mode    => '0644',
@@ -360,13 +367,16 @@ node /quartermaster.*/ {
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-44-cb-0a.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-22-19-27-0f-51.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-43-95.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-72-bc.cmd',
+# hv-compute29
+#    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d3-72-bc.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-36.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-8a.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-9e.cmd',
+# hv-compute32
+#    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-9e.cmd',
     '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-3b.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-c3.cmd',
-    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
+    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-35-c3.cmd']:
+# hv-compute38
+#    '/srv/install/microsoft/winpe/system/menu/00-1e-c9-d0-34-2c.cmd']:
      ensure  => present,
      owner   => root,
      group   => root,
@@ -422,6 +432,7 @@ node /jenkins.*/ {
     servers => ['bonehed.lcs.mit.edu'],
   }
   class {'basenode::ipmitools':}
+  class {'sensu_server::client':}
     include jenkins
     jenkins::plugin {
       'swarm': ;
@@ -481,6 +492,8 @@ node /jenkins.*/ {
 
 node /^git.*/{
 #  include classes/git_server
+  class {'basenode':}
+  class {'sensu_server::client':}
   class {'gitlab_server': }
 }
 node /^(frodobaggins).*/{
@@ -512,6 +525,7 @@ node /^(index.docker).*/{
 node /vpn.*/ {
 #  class {'basenode':}
 #  class {'basenode::dhcp2static':}
+  class {'sensu_server::client':}
 
   package {'bridge-utils':
     ensure => latest,
@@ -607,6 +621,7 @@ node /vpn.*/ {
 node /zuul.*/ {
 # class {'zuul':}
   class {'basenode':}
+  class {'sensu_server::client':}
 #  class { 'openstack_project::zuul_prod':
 #    gerrit_server        => 'review.openstack.org',
 #    gerrit_user          => 'hyper-v-ci',
@@ -622,11 +637,13 @@ notify {"${hostname} we're manually managing for now":}
 node /hawk.*/ {
   class {'basenode':}
   class {'jenkins::slave':}
+  class {'sensu_server::client':}
   class {'iphawk':}
 }
 node /logs.*/ {
   class {'basenode':}
   class {'jenkins::slave':}
+  class {'sensu_server::client':}
   user {'logs':
     ensure     => present,
     comment    => 'log user',
@@ -766,6 +783,7 @@ node /ironic.*/{
 node /^(kvm-compute[0-9][0-9]).*/{
   class{'basenode':}  
   class{'dell_openmanage':}
+  class{'sensu_server::client':}
 #  class{'dell_openmanage::firmware::update':}
   class{'jenkins::slave':
     labels            => 'kvm',
@@ -797,7 +815,7 @@ node /^(kvm-compute[0-9][0-9]).*/{
      file_line {
       'vncserver_listen':
         path   => '/etc/nova/nova.conf',
-        match  => "vncserver_listen=10\.21\.7\.*",
+        match  => 'vncserver_listen=10\.21\.7\.*',
         line   => "vncserver_listen=${ipaddress_eth0}",
         ensure => present,
         require => File['/etc/nova'],
@@ -806,7 +824,7 @@ node /^(kvm-compute[0-9][0-9]).*/{
      file_line {
       'vncserver_proxyclient_address':
         path   => '/etc/nova/nova.conf',
-        match  => "vncserver_proxyclient_address=10\.21\.7\.*",
+        match  => 'vncserver_proxyclient_address=10\.21\.7\.*',
         line   => "vncserver_proxyclient_address=${ipaddress_eth0}",
         ensure => present,
         require => File['/etc/nova'],
@@ -865,6 +883,7 @@ node /^(kvm-compute[0-9][0-9]).*/{
 
 node /^(openstack-controller).*/{
   class{'basenode':}  
+  class{'sensu_server::client':}
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave':
     executors => 22,
@@ -906,6 +925,7 @@ node /^(openstack-controller).*/{
 }
 node /^(neutron-controller).*/{
   class{'basenode':}  
+  class{'sensu_server::client':}
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave': }
   class{'packstack::yumrepo':}  
@@ -920,34 +940,59 @@ node /^(neutron-controller).*/{
 #   class {'windows_common::configuration::ntp':}
 #}
 node /^(hv-compute[0-9][0-9]).*/{
-  class {'windows_common':}
-  class {'windows_common::configuration::disable_firewalls':}
-  class {'windows_common::configuration::enable_auto_update':}
-  class {'windows_common::configuration::ntp':
-    before => Class['windows_openssl'],
-  }
-  class {'windows_common::configuration::rdp':}
-  class {'windows_openssl': }
-  class {'java': distribution => 'jre' }
+  case $kernel {
+    'Windows':{
+      class {'windows_common':}
+      class {'windows_common::configuration::disable_firewalls':}
+      class {'windows_common::configuration::enable_auto_update':}
+      class {'windows_common::configuration::ntp':
+        before => Class['windows_openssl'],
+      }
+      class {'windows_common::configuration::rdp':}
+      class {'windows_openssl': }
+      class {'java': distribution => 'jre' }
 
-  virtual_switch { 'br100':
-    notes             => 'Switch bound to main address fact',
-    type              => 'External',
-    os_managed        => true,
-    interface_address => '10.0.2.*',
-  }
+      virtual_switch { 'br100':
+        notes             => 'Switch bound to main address fact',
+        type              => 'External',
+        os_managed        => true,
+        interface_address => '10.0.2.*',
+      }
 
-  class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
-  class {'openstack_hyper_v::nova_dependencies':}
-  class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
-
-  class {'jenkins::slave': 
-    install_java      => false,
-    require           => [Class['java'],Class['cloudbase_prep']],
-    manage_slave_user => false,
-    executors         => 1,
-    labels            => 'hyper-v',
-    masterurl         => 'http://jenkins.openstack.tld:8080',
+      class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
+      class {'openstack_hyper_v::nova_dependencies':}
+      class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+      case $hostname {
+        'hv-compute28','hv-compute29','hv-compute32','hv-compute38':{
+           class {'jenkins::slave': 
+             install_java      => false,
+             require           => [Class['java'],Class['cloudbase_prep']],
+             manage_slave_user => false,
+             executors         => 1,
+             labels            => '',
+             masterurl         => 'http://jenkins.openstack.tld:8080',
+           }  
+        }
+        default:{
+          class {'jenkins::slave': 
+            install_java      => false,
+            require           => [Class['java'],Class['cloudbase_prep']],
+            manage_slave_user => false,
+            executors         => 1,
+            labels            => 'hyper-v',
+            masterurl         => 'http://jenkins.openstack.tld:8080',
+          }
+        }
+      }
+    }
+    'Linux':{
+       notify{"${kernel} on ${fqdn} is running Linux":}
+      class{'dell_openmanage':}
+      class{'dell_openmanage::firmware::update':}
+    }
+    default:{
+      notify{"${kernel} on ${fqdn} doesn't belong here":}
+    }
   }
 }
 
@@ -983,7 +1028,9 @@ node /^(c3560g05).*/ {
   notify {"${hostname} is a switch":}
 } 
 node /sauron.*/{ 
+  class{'basenode':}
   class{'sensu_server':}
 }
 
 import 'nodes/sandboxes.pp'
+
