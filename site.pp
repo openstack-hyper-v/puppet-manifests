@@ -438,7 +438,7 @@ node /jenkins.*/ {
       'swarm': ;
       'git':   ;
       'credentials':   ;
-     #'svn':   ;
+#     'svn':   ;
 #     'ssh-auth':   ;
 #     'pam-auth':   ;
       'ldap':   ;
@@ -448,6 +448,22 @@ node /jenkins.*/ {
       'nodelabelparameter': ;
 #      'JClouds':   ;
       'parameterized-trigger': ;
+
+      #Additional plugins as identified by previous use
+      'externalresource-dispatcher': ;
+      'gearman-plugin': ;
+      'git-client': ;
+      'github-api': ;
+      'github': ;
+      'postbuild-task': ;
+      'powershell': ;
+      'jquery': ;
+      'logging': ;
+      'metadata': ;
+      'python': ;
+      'scm-api': ;
+      'timestamper': ;
+      'token-macro': ;
 
     }
 # Build Tools
@@ -469,15 +485,12 @@ node /jenkins.*/ {
 
 # Initial security settings.  May be adjusted later.
   $jenkinsconfig_path = '/var/lib/jenkins/'
-#  file { "${jenkinsconfig_path}config.xml":
-#    ensure  => link,
-#    target  => "${jenkinsconfig_path}users/config_base.xml",
-#	require => File["${jenkinsconfig_path}users"],
-#  }
+
   file { "${jenkinsconfig_path}config.xml":
     ensure  => link,
     target  => "${jenkinsconfig_path}users/config_base.xml",
 	require => File["${jenkinsconfig_path}users"],
+    owner   => 'jenkins',
   }
 
   file { "${jenkinsconfig_path}users":
@@ -486,6 +499,7 @@ node /jenkins.*/ {
     recurse => remote,
     replace => false,
     purge   => false,
+    owner   => 'jenkins',
   }
 
 }
