@@ -607,6 +607,10 @@ node /vpn.*/ {
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }
+  openvpn::client {'vbud':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
 #  openvpn::client_specific_config {'ppouliot':
 #  openvpn::client_specific_config {'ppouliot':
 #  openvpn::client_specific_config {'ppouliot':
@@ -637,6 +641,9 @@ node /zuul.*/ {
   class {'basenode':}
   class {'sensu_server::client':}
 #  class { 'openstack_project::zuul_prod':
+#    jenkins_server       => 'http://jenkins.openstack.tld:8080',
+#    jenkins_user         => 'zuul',
+#    jenkins_apikey       => 'a681364e086d19bf130207db042ff7a5',
 #    gerrit_server        => 'review.openstack.org',
 #    gerrit_user          => 'hyper-v-ci',
 #    zuul_ssh_private_key => '/home/zuul/.ssh/id_rsa',
@@ -646,6 +653,14 @@ node /zuul.*/ {
 #    statsd_host          => 'graphite.openstack.org',
 #    gearman_workers      => ['jenkins.openstack.tld'],
 #  }
+#  file { '/etc/cron.daily/rotate_zuul':
+#    ensure  => file,
+#    owner   => root,
+#    group   => root,
+#    mode    => 0755,
+#    source  => "puppet:///modules/openstack_project/zuul/rotate_zuul",
+#  }
+
 notify {"${hostname} we're manually managing for now":}
 }
 node /hawk.*/ {
@@ -687,9 +702,61 @@ node /logs.*/ {
     require => User['logs'],
   }
 
+  package {'open-iscsi':
+    ensure => latest,
+  }
+  file {'/etc/iscsi/iscsid.conf':
+    ensure => present,
+    require => Package['open-iscsi'],
+  }
+  exec {'disable-iscsi-manual':
+    command => "/bin/sed -i 's/node.startup\ =\ manual/#\ node.startup\ =\ manual/g' /etc/iscsi/iscsid.conf",
+    require => [Package['open-iscsi'],File['/etc/iscsi/iscsid.conf']],
+    unless  => '/bin/grep -c "^#\ node.startup = manual" /etc/iscsi/iscsid.conf', 
+  }
+  exec {'enable-iscsi-automatic':
+    command => "/bin/sed -i 's/#\ node.startup\ =\ automatic/node.startup\ =\ automatic/g' /etc/iscsi/iscsid.conf",
+    require => Exec['disable-iscsi-manual'],
+    unless  => '/bin/grep -c "^node.startup = automatic" /etc/iscsi/iscsid.conf', 
+    notify  => Service['open-iscsi'],
+  }
+  service {'open-iscsi':
+    ensure => running,
+    require => Package['open-iscsi'],
+  }
+  exec {'iscsi-discovery-equallogic':
+    command   => '/usr/bin/iscsiadm -m discovery -t st -p equallogic.openstack.tld',
+    require   => [Package['open-iscsi'],
+                  File['/etc/iscsi/iscsid.conf'],
+                  Exec['enable-iscsi-automatic']],
+    logoutput => true,
+  }
+  exec {'iscsi-login-equallogic':
+    command   => '/usr/bin/iscsiadm -m node --login',
+    require   => Exec['iscsi-discovery-equallogic'],
+    logoutput => true,
+    creates   => ['/etc/iscsi/nodes/iqn.2001-05.com.equallogic\:0-8a0906-dfe8e5504-d590000001452f3f-tempest-logs/10.21.7.251\,3260\,1/default',
+                  '/dev/sda'],
+  }
+
+
+  file {'/etc/fstab':
+    ensure => present,
+  } -> 
+  file_line {'tempest-logs':
+    line => '/dev/sda1	/srv/logs	ext4	defaults,auto,_netdev 0 0',
+    path => '/etc/fstab',
+    require => [Exec['iscsi-login-equallogic'],File['/srv/logs']],
+  }
+  exec {'remount-iscsi-volume':
+    command => '/bin/mount -a',
+    require => File_line['tempest-logs'],
+  }
+  
   package {'apparmor-utils':
     ensure => latest,
   }
+  
   service {'apparmor':
     ensure => running,
   }
@@ -946,21 +1013,22 @@ node /^(neutron-controller).*/{
 }
 # End Packstack nodes
 
-#node /^(hv-compute26).*/{
-#  class {'windows_openssl': }
-#  class {'windows_python':}
-#  #class {'mingw':}
-#  class {'openstack_hyper_v::nova_dependencies':}
-#   class {'windows_common::configuration::ntp':}
+#node /^(hv-compute32).*/{
+#   class {'vj-test':}
 #}
+
 node /^(hv-compute[0-9][0-9]).*/{
   case $kernel {
     'Windows':{
       class {'windows_common':}
       class {'windows_common::configuration::disable_firewalls':}
-      class {'windows_common::configuration::enable_auto_update':}
+      class {'windows_common::configuration::disable_auto_update':}
       class {'windows_common::configuration::ntp':
         before => Class['windows_openssl'],
+      }
+      class{'windows_sensu':
+        rabbitmq_password        => 'sensu',
+        rabbitmq_host            => "10.21.7.4",
       }
       class {'windows_common::configuration::rdp':}
       class {'windows_openssl': }
