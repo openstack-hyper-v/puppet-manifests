@@ -41,7 +41,9 @@ node /^(norman|mother|ns[0-9\.]+)/ {
 node /quartermaster.*/ {
   Quartermaster::Pxe::File <<||>>
 
-  class {'jenkins::slave':}
+  class {'jenkins::slave': 
+    masterurl => 'http://jenkins.openstack.tld:8080',
+  }
   class {'basenode::ipmitools':}
   class {'sensu_server::client':}
   # Set NTP
@@ -665,13 +667,17 @@ notify {"${hostname} we're manually managing for now":}
 }
 node /hawk.*/ {
   class {'basenode':}
-  class {'jenkins::slave':}
+  class {'jenkins::slave':
+    masterurl => 'http://jenkins.openstack.tld:8080',
+  }
   class {'sensu_server::client':}
   class {'iphawk':}
 }
 node /logs.*/ {
   class {'basenode':}
-  class {'jenkins::slave':}
+  class {'jenkins::slave':
+    masterurl => 'http://jenkins.openstack.tld:8080',
+  }
   class {'sensu_server::client':}
   user {'logs':
     ensure     => present,
@@ -968,6 +974,7 @@ node /^(openstack-controller).*/{
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave':
     executors => 22,
+    masterurl => 'http://jenkins.openstack.tld:8080',
   }
 
   class {'packstack':
@@ -1008,7 +1015,9 @@ node /^(neutron-controller).*/{
   class{'basenode':}  
   class{'sensu_server::client':}
 #  class{'basenode::dhcp2static':}  
-  class{'jenkins::slave': }
+  class{'jenkins::slave': 
+    masterurl => 'http://jenkins.openstack.tld:8080',
+  }
   class{'packstack::yumrepo':}  
 }
 # End Packstack nodes
