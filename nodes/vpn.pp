@@ -1,6 +1,7 @@
 node /vpn.*/ {
 #  class {'basenode':}
 #  class {'basenode::dhcp2static':}
+  class {'sensu_server::client':}
 
   package {'bridge-utils':
     ensure => latest,
@@ -57,6 +58,18 @@ node /vpn.*/ {
     remote_host => '64.119.130.115',
   }
   openvpn::client {'cloudbase':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'apilotti':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'gsamfira':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'vbud':
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }

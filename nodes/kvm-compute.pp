@@ -14,9 +14,20 @@ node /^(kvm-compute[0-9][0-9])\.openstack\.tld$/{
     kvm_compute_host  => '10.21.7.31,10.21.7.32,10.21.7.33,10.21.7.34,10.21.7.35,10.21.7.36,10.21.7.38',
   }
   case $hostname {
-    'kvm-compute01','kvm-compute02','kvm-compute03','kvm-compute04','kvm-compute05','kvm-compute06':{ $data_interface = 'em2' }
-    'kvm-compute07','kvm-compute08','kvm-compute09','kvm-compute10':{ $data_interface = 'eth1' }
-    default: { notify {"This isn't for ${hostname}":}
+    'kvm-compute01',
+    'kvm-compute02',
+    'kvm-compute03',
+    'kvm-compute04',
+    'kvm-compute05',
+    'kvm-compute06':
+        { $data_interface = 'em2' }
+    'kvm-compute07',
+    'kvm-compute08',
+    'kvm-compute09',
+    'kvm-compute10':
+        { $data_interface = 'eth1' }
+    default: 
+        { notify {"This isn't for ${hostname}":}
     }
   }
   case $hostname {
@@ -67,34 +78,27 @@ node /^(kvm-compute[0-9][0-9])\.openstack\.tld$/{
     mode   => '0644',
     source => "puppet:///modules/packstack/ifcfg-${data_interface}",
   }
-#  case $hostname {
-#    'kvm-compute08','kvm-compute09','kvm-compute10':{
-#      package {['openstack-nova-compute',
-#                'openstack-selinux',
-#                'openstack-neutron-openvswitch',
-#                'openstack-neutron-linuxbridge',
-#                'python-slip',
-#                'python-slip-dbus',
-#                'libglade2',
-#                'nagios-common',
-#                'tuned',
-#                'yum-plugin-priorities',
-#                'system-config-firewall',
-#                'telnet',
-#                'nrpe',
-#                'centos-release-xen',
-#                'openstack-ceilometer-compute'] :
+#  package {['openstack-nova-compute',
+#            'openstack-selinux',
+#            'openstack-neutron-openvswitch',
+#            'openstack-neutron-linuxbridge',
+#            'python-slip',
+#            'python-slip-dbus',
+#            'libglade2',
+#            'nagios-common',
+#            'tuned',
+#            'yum-plugin-priorities',
+#            'system-config-firewall',
+#            'telnet',
+#            'nrpe',
+#            'centos-release-xen',
+#            'openstack-ceilometer-compute'] :
 #
-#        ensure => 'latest',
-#      }
-#      exec {'centos_release_xen_update':
-#        command   => "/usr/bin/yum update -y --disablerepo=* --enablerepo=Xen4CentOS kernel",
-#        logoutput => true,
-#        timeout   => 0,
-#      }
-#    }
-#    default:{
-#      notify {"${fqdn} doesn't require this":}
-#    }
+#    ensure => 'present',
+#  }
+#  exec {'centos_release_xen_update':
+#    command   => "/usr/bin/yum update -y --disablerepo=* --enablerepo=Xen4CentOS kernel",
+#    logoutput => true,
+#    timeout   => 0,
 #  }
 }
