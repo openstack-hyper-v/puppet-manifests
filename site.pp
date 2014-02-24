@@ -936,36 +936,36 @@ node /^(kvm-compute[0-9][0-9]).*/{
     mode   => '0644',
     source => "puppet:///modules/packstack/ifcfg-${data_interface}",
   }
-  case $hostname {
-    'kvm-compute08','kvm-compute09','kvm-compute10':{
-      package {['openstack-nova-compute',
-                'openstack-selinux',
-                'openstack-neutron-openvswitch',
-                'openstack-neutron-linuxbridge',
-                'python-slip',
-                'python-slip-dbus',
-                'libglade2',
-                'nagios-common',
-                'tuned',
-                'yum-plugin-priorities',
-                'system-config-firewall',
-                'telnet',
-                'nrpe',
-                'centos-release-xen',
-                'openstack-ceilometer-compute'] :
-
-        ensure => 'latest',
-      }
-      exec {'centos_release_xen_update':
-        command   => "/usr/bin/yum update -y --disablerepo=* --enablerepo=Xen4CentOS kernel",
-        logoutput => true,
-        timeout   => 0,
-      }
-    }
-    default:{
-      notify {"${fqdn} doesn't require this":}
-    }
-  }
+#  case $hostname {
+#    'kvm-compute08','kvm-compute09','kvm-compute10':{
+#      package {['openstack-nova-compute',
+#                'openstack-selinux',
+#                'openstack-neutron-openvswitch',
+#                'openstack-neutron-linuxbridge',
+#                'python-slip',
+#                'python-slip-dbus',
+#                'libglade2',
+#                'nagios-common',
+#                'tuned',
+#                'yum-plugin-priorities',
+#                'system-config-firewall',
+#                'telnet',
+#                'nrpe',
+#                'centos-release-xen',
+#                'openstack-ceilometer-compute'] :
+#
+#        ensure => 'latest',
+#      }
+#      exec {'centos_release_xen_update':
+#        command   => "/usr/bin/yum update -y --disablerepo=* --enablerepo=Xen4CentOS kernel",
+#        logoutput => true,
+#        timeout   => 0,
+#      }
+#    }
+#    default:{
+#      notify {"${fqdn} doesn't require this":}
+#    }
+#  }
 }
 
 node /^(openstack-controller).*/{
