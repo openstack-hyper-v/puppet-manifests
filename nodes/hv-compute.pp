@@ -1,77 +1,102 @@
-node /^(hv-compute[0-9][0-9]).*/{
-#  $path => $::path,
-  #class{'petools':}
-#  class{'windows_common::configuration::disable_firewalls':}
-#  class{'windows_common::configuration::enable_auto_update':}
-#  class{'windows_common::configuration::rdp':}
-#  class{'windows_common::configuration::ntp':}
-#  Package { provider => chocolatey }
-#  package {'puppet': ensure => installed, }
-#  package {'python.x86': ensure => installed, }
-#  package {'easy.install': ensure => installed, }
-#  package {'pip': ensure => installed, }
-#  package {'mingw': ensure => installed, }
-#  package {'chromium': ensure => installed, }
-#  package {'java.jdk': ensure => installed, }
-  notify {"Welcome ${fqdn}":}
-  case $hostname {
-    'hv-compute01':{
-        class {'petools':}
-     }
-    'hv-compute02':{}
-    'hv-compute03':{}
-    'hv-compute04':{}
-    'hv-compute05':{}
-    'hv-compute06':{}
-    'hv-compute07':{}
-    'hv-compute08':{}
-    'hv-compute09':{}
-    'hv-compute10':{}
-    'hv-compute11':{}
-    'hv-compute12:{}
-    'hv-compute13:{}
-    'hv-compute14:{}
-    'hv-compute15:{}
-    'hv-compute16:{}
-    'hv-compute17:{}
-    'hv-compute18:{}
-    'hv-compute19:{}
-    'hv-compute20:{}
-    'hv-compute21:{}
-    'hv-compute22:{}
-    'hv-compute23:{}
-    'hv-compute24:{}
-    'hv-compute25:{}
-    'hv-compute26:{}
-    'hv-compute27:{}
-    'hv-compute28:{}
-    'hv-compute29:{}
-    'hv-compute30:{}
-    'hv-compute31:{}
-    'hv-compute32:{}
-    'hv-compute33:{}
-    'hv-compute34:{}
-    'hv-compute35:{}
-    'hv-compute36:{}
-    'hv-compute37:{}
-    'hv-compute38:{}
-    'hv-compute39:{}
-    'hv-compute40:{}
-    'hv-compute41:{}
-    'hv-compute42:{}
-    'hv-compute43:{}
-    'hv-compute44:{}
-    'hv-compute45:{}
-    'hv-compute46:{}
-    'hv-compute47:{}
-    'hv-compute48:{}
-    'hv-compute49:{}
-    'hv-compute50:{}
-    default: { notify{"Hey ${hostname}! You don't have individual classes":}}
+node /^hv-compute1[0-9][0-9]\.openstack\.tld$/{
+  case $kernel {
+    'Windows':{
+      class {'windows_common':}
+      class {'windows_common::configuration::disable_firewalls':}
+      class {'windows_common::configuration::disable_auto_update':}
+      class {'windows_common::configuration::ntp':
+        before => Class['windows_openssl'],
+      }
+      class{'windows_sensu':
+        rabbitmq_password        => 'sensu',
+        rabbitmq_host            => "10.21.7.4",
+      }
+      class {'windows_common::configuration::rdp':}
+      class {'windows_openssl': }
+      class {'java': distribution => 'jre' }
 
+      virtual_switch { 'br100':
+        notes             => 'Switch bound to main address fact',
+        type              => 'External',
+        os_managed        => true,
+        interface_address => '10.0.2.*',
+      }
+
+      class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
+      class {'openstack_hyper_v::nova_dependencies':}
+      class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+      class {'jenkins::slave':
+        install_java      => false,
+        require           => [Class['java'],Class['cloudbase_prep']],
+        manage_slave_user => false,
+        executors         => 1,
+        labels            => 'test',
+        masterurl         => 'http://sandbox01.openstack.tld:8080',
+      }
+    }
+    default:{
+      notify{"${kernel} on ${fqdn} doesn't belong here":}
+    }
   }
-  class {'windows_common':}
-  class {'windows_common::configuration::disable_firewalls':}
-  class {'windows_common::configuration::enable_auto_update':}
-  class {'windows_common::configuration::ntp':}
+
+}
+node /^hv-compute[0-9][0-9]\.openstack\.tld$/{
+  case $kernel {
+    'Windows':{
+      class {'windows_common':}
+      class {'windows_common::configuration::disable_firewalls':}
+      class {'windows_common::configuration::disable_auto_update':}
+      class {'windows_common::configuration::ntp':
+        before => Class['windows_openssl'],
+      }
+      class{'windows_sensu':
+        rabbitmq_password        => 'sensu',
+        rabbitmq_host            => "10.21.7.4",
+      }
+      class {'windows_common::configuration::rdp':}
+      class {'windows_openssl': }
+      class {'java': distribution => 'jre' }
+
+      virtual_switch { 'br100':
+        notes             => 'Switch bound to main address fact',
+        type              => 'External',
+        os_managed        => true,
+        interface_address => '10.0.2.*',
+      }
+
+      class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
+      class {'openstack_hyper_v::nova_dependencies':}
+      class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+      case $hostname {
+        'hv-compute28','hv-compute29','hv-compute32','hv-compute38':{
+           class {'jenkins::slave': 
+             install_java      => false,
+             require           => [Class['java'],Class['cloudbase_prep']],
+             manage_slave_user => false,
+             executors         => 1,
+             labels            => '',
+             masterurl         => 'http://jenkins.openstack.tld:8080',
+           }  
+        }
+        default:{
+          class {'jenkins::slave': 
+            install_java      => false,
+            require           => [Class['java'],Class['cloudbase_prep']],
+            manage_slave_user => false,
+            executors         => 1,
+            labels            => 'hyper-v',
+            masterurl         => 'http://jenkins.openstack.tld:8080',
+          }
+        }
+      }
+    }
+    'Linux':{
+       notify{"${kernel} on ${fqdn} is running Linux":}
+      class{'dell_openmanage':}
+      class{'dell_openmanage::firmware::update':}
+    }
+    default:{
+      notify{"${kernel} on ${fqdn} doesn't belong here":}
+    }
+  }
 }
