@@ -76,7 +76,7 @@ node /logs.*/ {
     ensure => present,
   } -> 
   file_line {'tempest-logs':
-    line => '/dev/sda1	/srv/logs	ext4	defaults,auto,_netdev 0 0',
+    line => '/dev/mapper/log--storage-storage  /srv/logs       ext4    defaults,auto,_netdev 0 0',
     path => '/etc/fstab',
     require => [Exec['iscsi-login-equallogic'],File['/srv/logs']],
   }
