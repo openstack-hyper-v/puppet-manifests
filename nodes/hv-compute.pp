@@ -1,4 +1,4 @@
-node /^hv-compute1[0-9][0-9]\.openstack\.tld$/{
+node /^hv-compute[0-9]+\.openstack\.tld$/{
   case $kernel {
     'Windows':{
       class {'windows_common':}
@@ -68,7 +68,7 @@ node 'hv-compute01.openstack.tld',
      'hv-compute27.openstack.tld',
      'hv-compute30.openstack.tld',
      'hv-compute31.openstack.tld',
-     'hv-compute32.openstack.tld',
+     'hv-compute32.openstack.tld'
 {
   case $kernel {
     'Windows':{
