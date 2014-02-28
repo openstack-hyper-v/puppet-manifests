@@ -22,9 +22,8 @@ node /^hv-compute1[0-9][0-9]\.openstack\.tld$/{
         interface_address => '10.0.2.*',
       }
 
-      class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
-      class {'openstack_hyper_v::nova_dependencies':}
-      class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+      class {'windows_git': before => Class['cloudbase_prep'],}
+      class {'cloudbase_prep': }
       class {'jenkins::slave':
         install_java      => false,
         require           => [Class['java'],Class['cloudbase_prep']],
@@ -40,7 +39,37 @@ node /^hv-compute1[0-9][0-9]\.openstack\.tld$/{
   }
 
 }
-node /^hv-compute[0-9][0-9]\.openstack\.tld$/{
+
+# Limit production nodes to explicitly defined machines.
+node 'hv-compute01.openstack.tld',
+     'hv-compute02.openstack.tld',
+     'hv-compute03.openstack.tld',
+     'hv-compute04.openstack.tld',
+     'hv-compute05.openstack.tld',
+     'hv-compute06.openstack.tld',
+     'hv-compute07.openstack.tld',
+     'hv-compute08.openstack.tld',
+     'hv-compute09.openstack.tld',
+     'hv-compute10.openstack.tld',
+     'hv-compute11.openstack.tld',
+     'hv-compute12.openstack.tld',
+     'hv-compute13.openstack.tld',
+     'hv-compute14.openstack.tld',
+     'hv-compute15.openstack.tld',
+     'hv-compute16.openstack.tld',
+     'hv-compute17.openstack.tld',
+     'hv-compute18.openstack.tld',
+     'hv-compute19.openstack.tld',
+     'hv-compute20.openstack.tld',
+     'hv-compute21.openstack.tld',
+     'hv-compute22.openstack.tld',
+     'hv-compute23.openstack.tld',
+     'hv-compute26.openstack.tld',
+     'hv-compute27.openstack.tld',
+     'hv-compute30.openstack.tld',
+     'hv-compute31.openstack.tld',
+     'hv-compute32.openstack.tld',
+{
   case $kernel {
     'Windows':{
       class {'windows_common':}
@@ -64,9 +93,8 @@ node /^hv-compute[0-9][0-9]\.openstack\.tld$/{
         interface_address => '10.0.2.*',
       }
 
-      class {'windows_git': before => [Class['cloudbase_prep'],Class['openstack_hyper_v::nova_dependencies']],}
-      class {'openstack_hyper_v::nova_dependencies':}
-      class {'cloudbase_prep': require => Class['openstack_hyper_v::nova_dependencies'],}
+      class {'windows_git': before => Class['cloudbase_prep'],}
+      class {'cloudbase_prep': }
       case $hostname {
         'hv-compute28','hv-compute29','hv-compute32','hv-compute38':{
            class {'jenkins::slave': 
