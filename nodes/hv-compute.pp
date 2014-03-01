@@ -69,7 +69,6 @@ node 'hv-compute01.openstack.tld',
      'hv-compute30.openstack.tld',
      'hv-compute31.openstack.tld',
      
-     'hv-compute100.openstack.tld',
      'hv-compute101.openstack.tld',
      'hv-compute102.openstack.tld',
      'hv-compute103.openstack.tld',
@@ -78,7 +77,8 @@ node 'hv-compute01.openstack.tld',
      'hv-compute108.openstack.tld',
      'hv-compute110.openstack.tld',
      'hv-compute111.openstack.tld',
-     'hv-compute115.openstack.tld'
+     'hv-compute115.openstack.tld',
+     'hv-compute118.openstack.tld'
 {
   case $kernel {
     'Windows':{
