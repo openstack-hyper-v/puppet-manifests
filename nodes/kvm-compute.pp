@@ -71,7 +71,7 @@ node /^(kvm-compute[0-9]+)\.openstack\.tld$/{
        owner   => 'root',
        group   => 'root',
        mode    => '0755',
-       source  => 'puppet:///extra_files/${data_interface}-neutron/neutron',
+       source  => "puppet:///extra_files/${data_interface}-neutron/neutron",
      }
     }
      default: { 
