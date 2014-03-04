@@ -98,7 +98,6 @@ node 'hv-compute01.openstack.tld',
      'hv-compute137.openstack.tld',
      'hv-compute138.openstack.tld',
      'hv-compute139.openstack.tld'
-
 {
   case $kernel {
     'Windows':{
