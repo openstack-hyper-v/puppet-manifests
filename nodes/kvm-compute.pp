@@ -50,7 +50,7 @@ node /^(kvm-compute[0-9]+)\.openstack\.tld$/{
         path   => '/etc/nova/nova.conf',
         section => 'DEFAULT',
         setting => 'vncserver_listen',
-        line   => "${ipaddress_eth0}",
+        value   => "${ipaddress_eth0}",
         ensure => present,
         require => File['/etc/nova'],
      }
@@ -60,7 +60,7 @@ node /^(kvm-compute[0-9]+)\.openstack\.tld$/{
         path   => '/etc/nova/nova.conf',
         section => 'DEFAULT',
         setting => 'vncserver_proxyclient_address',
-        line   => "${ipaddress_eth0}",
+        value   => "${ipaddress_eth0}",
         ensure => present,
         require => File['/etc/nova'],
      }
