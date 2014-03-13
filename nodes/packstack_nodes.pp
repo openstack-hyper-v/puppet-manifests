@@ -7,7 +7,7 @@ node /^(openstack-controller).*/{
   class{'sensu_server::client':}
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave':
-    executors => 22,
+    executors => 60,
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
 
