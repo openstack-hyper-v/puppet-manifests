@@ -32,6 +32,7 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         labels            => 'test',
         masterurl         => 'http://sandbox01.openstack.tld:8080',
       }
+      class{'sensu_client_plugins': require => Class['windows_sensu'],}
     }
     default:{
       notify{"${kernel} on ${fqdn} doesn't belong here":}
@@ -111,6 +112,7 @@ node 'hv-compute01.openstack.tld',
         rabbitmq_password        => 'sensu',
         rabbitmq_host            => "10.21.7.4",
       }
+      class{'sensu_client_plugins': require => Class['windows_sensu'],}
       class {'windows_common::configuration::rdp':}
       class {'windows_openssl': }
       class {'java': distribution => 'jre' }

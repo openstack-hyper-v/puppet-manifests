@@ -3,6 +3,7 @@ node /zuul.*/ {
 # class {'zuul':}
   class {'basenode':}
   class {'sensu_server::client':}
+  class{'sensu_client_plugins': require => Class['sensu_server::client'],}
 #  class { 'openstack_project::zuul_prod':
 #    jenkins_server       => 'http://jenkins.openstack.tld:8080',
 #    jenkins_user         => 'zuul',

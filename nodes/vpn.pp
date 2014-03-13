@@ -2,6 +2,7 @@ node /vpn.*/ {
 #  class {'basenode':}
 #  class {'basenode::dhcp2static':}
   class {'sensu_server::client':}
+  class{'sensu_client_plugins': require => Class['sensu_server::client'],}
 
   package {'bridge-utils':
     ensure => latest,

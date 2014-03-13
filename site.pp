@@ -42,6 +42,7 @@ node /^git.*/{
 #  include classes/git_server
   class {'basenode':}
   class {'sensu_server::client':}
+  class {'sensu_client_plugins': require => Class['sensu_server::client'],}
   class {'gitlab_server': }
 }
 
@@ -61,6 +62,7 @@ node /hawk.*/ {
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
   class {'sensu_server::client':}
+  class {'sensu_client_plugins': require => Class['sensu_server::client'],}
   class {'iphawk':}
 }
 

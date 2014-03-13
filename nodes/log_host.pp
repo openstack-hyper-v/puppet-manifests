@@ -5,6 +5,7 @@ node /logs.*/ {
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
   class {'sensu_server::client':}
+  class{'sensu_client_plugins': require => Class['sensu_server::client'],}
   user {'logs':
     ensure     => present,
     comment    => 'log user',
