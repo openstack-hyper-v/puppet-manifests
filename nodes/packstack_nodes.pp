@@ -4,8 +4,8 @@
 
 node /^(openstack-controller).*/{
   class{'basenode':}  
-  class{'sensu_server::client':}
-  class{'sensu_client_plugins': require => Class['sensu_server::client'],}
+  class{'sensu':}
+  class{'sensu_client_plugins': require => Class['sensu'],}
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave':
     executors => 60,
@@ -48,8 +48,8 @@ node /^(openstack-controller).*/{
 }
 node /^(neutron-controller).*/{
   class{'basenode':}  
-  class{'sensu_server::client':}
-  class{'sensu_client_plugins': require => Class['sensu_server::client'],}
+  class{'sensu':}
+  class{'sensu_client_plugins': require => Class['sensu'],}
 #  class{'basenode::dhcp2static':}  
   class{'jenkins::slave': 
     masterurl => 'http://jenkins.openstack.tld:8080',

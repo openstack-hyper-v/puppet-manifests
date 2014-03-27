@@ -41,8 +41,8 @@ node /^(norman|mother|ns[0-9\.]+)/ {
 node /^git.*/{
 #  include classes/git_server
   class {'basenode':}
-  class {'sensu_server::client':}
-  class {'sensu_client_plugins': require => Class['sensu_server::client'],}
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
   class {'gitlab_server': }
 }
 
@@ -61,8 +61,8 @@ node /hawk.*/ {
   class {'jenkins::slave':
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
-  class {'sensu_server::client':}
-  class {'sensu_client_plugins': require => Class['sensu_server::client'],}
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
   class {'iphawk':}
 }
 
@@ -91,6 +91,7 @@ import 'nodes/jenkins.pp'
 import 'nodes/vpn.pp'
 import 'nodes/frankenstein.pp'
 import 'nodes/frodo.pp'
+import 'nodes/zuul.pp'
 
 
 import 'nodes/hv-compute.pp'

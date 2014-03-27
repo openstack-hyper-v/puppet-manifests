@@ -1,8 +1,8 @@
 node /^(kvm-compute[0-9]+)\.openstack\.tld$/{
   class{'basenode':}  
   class{'dell_openmanage':}
-  class{'sensu_server::client':}
-  class{'sensu_client_plugins': require => Class['sensu_server::client'],}
+  class{'sensu':}
+  class{'sensu_client_plugins': require => Class['sensu'],}
 #  class{'dell_openmanage::firmware::update':}
   class{'jenkins::slave':
     labels            => 'kvm',

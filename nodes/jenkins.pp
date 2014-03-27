@@ -5,21 +5,18 @@ node /jenkins.*/ {
     servers => ['bonehed.lcs.mit.edu'],
   }
   class {'basenode::ipmitools':}
-  class {'sensu_server::client':}
+  class {'sensu':}
+  class{'sensu_client_plugins': require => Class['sensu'],}
     include jenkins
     jenkins::plugin {
       'swarm': ;
       'git':   ;
       'credentials':   ;
-#     'svn':   ;
-#     'ssh-auth':   ;
-#     'pam-auth':   ;
       'ldap':   ;
       'ssh-slaves':   ;
       'stackhammer':   ;
       'devstack':   ;
       'nodelabelparameter': ;
-#      'JClouds':   ;
       'parameterized-trigger': ;
 
       #Additional plugins as identified by previous use

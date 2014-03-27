@@ -5,7 +5,8 @@ node /quartermaster.*/ {
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
   class {'basenode::ipmitools':}
-  class {'sensu_server::client':}
+  class {'sensu':}
+  class{'sensu_client_plugins': require => Class['sensu'],}
   # Set NTP
   class {'ntp':
     servers => ['bonehed.lcs.mit.edu'],
