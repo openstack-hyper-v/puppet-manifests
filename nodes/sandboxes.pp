@@ -35,6 +35,67 @@ node /sandbox[0-9]+.*/{
         require => File["${jenkinsconfig_path}users"],
         owner   => 'jenkins',
       }
+
+      class { 'opentsdb':
+        service_autorestart => false,
+        version => master,
+        install_destination => '/opt/opentsdb',
+      }
+
+      $stackaliytics_pkgs = [
+        'libpython2.7-dev',
+        'python-pip',
+        'git',
+        'memcached',
+#        'nginx',
+        'uwsgi',
+        'uwsgi-plugin-python']
+
+      package { $stackaliytics_pkgs: 
+        ensure => present,
+      }
+
+      user { 'stackalytics':
+        ensure => present,
+      }
+
+      file { ['/opt/stack',
+             '/var/local/stackalytics']:
+        ensure  => directory,
+        owner   => 'stackalytics',
+        group   => 'stackalytics',
+        require => User['stackalytics'],
+      }
+
+      vcsrepo { '/opt/stack/stackalytics':
+        ensure   => present,
+        source   => 'git://github.com/stackforge/stackalytics.git',
+        provider => git,
+        require  => [Package['git'],File['/opt/stack']],
+      }
+
+      class { 'nginx': }
+
+      nginx::resource::vhost { 'sandbox01.openstack.tld':
+#        ensure => present,
+        location_custom_cfg => {
+          'uwsgi_pass' => 'unix:///tmp/stackalytics.sock',
+          'include' => 'uwsgi_params',
+          },
+#        require => Class['nginx'],
+      }
+      nginx::resource::location {'/static/':
+        vhost          => 'sandbox01.openstack.tld',
+        location_alias => '/opt/stack/stackalytics/dashboard/static/',
+#        require        => Nginx::Resource::Vhost['sandbox01.openstack.tld'],
+      }
+
+#      file { '':
+#        ensure  => file,
+#        source  => "puppet:///extra_files/stats/uwsgi.conf",
+#        require => Package['uwsgi'],
+#      }
+
     }
     #'sandbox02':{
       #class {'windows_common':}
@@ -462,5 +523,6 @@ node /^sandbox-kvm\d*/{
 
 }
 
-
-
+#node 'hv-compute145.openstack.tld'{
+#  class {'vj-test':}
+#}

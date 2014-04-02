@@ -83,6 +83,10 @@ node /ironic.*/{
 node /sauron.*/{ 
   class{'basenode':}
   class{'sensu_server':}
+  class {'sensu_client_plugins': require => Class['sensu_server'],}
+  package{'mailutils':
+    ensure => present,
+  }
 }
 
 import 'nodes/log_host.pp'
