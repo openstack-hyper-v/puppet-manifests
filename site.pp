@@ -94,7 +94,6 @@ import 'nodes/quartermaster.pp'
 import 'nodes/jenkins.pp'
 import 'nodes/vpn.pp'
 import 'nodes/frankenstein.pp'
-import 'nodes/frodo.pp'
 import 'nodes/zuul.pp'
 
 
