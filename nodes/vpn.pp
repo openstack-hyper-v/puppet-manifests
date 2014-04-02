@@ -74,6 +74,10 @@ node /vpn.*/ {
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }
+  openvpn::client {'avladu':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
 #  openvpn::client_specific_config {'ppouliot':
 #    server   => 'hypervci',
 #    ifconfig => '10.253.253.1 255.255.255.0',
