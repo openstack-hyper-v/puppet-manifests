@@ -57,6 +57,7 @@ node /^(index.docker).*/{
 }
 
 node /hawk.*/ {
+  $ipmi_network = '10.99.99.0/24'
   class {'basenode':}
   class {'jenkins::slave':
     masterurl => 'http://jenkins.openstack.tld:8080',
