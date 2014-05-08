@@ -133,15 +133,19 @@ node 'hv-compute01.openstack.tld',
 
       class {'windows_git': before => Class['cloudbase_prep'],}
       class {'cloudbase_prep': }
+      
+      $jenkins_label = $hostname ? {
+                         'hv-compute32' => 'hv-test',
+                         'hv-compute38' => 'hv-test',
+                         default        => 'hyper-v',
+                       }
+      
       class {'jenkins::slave': 
         install_java      => false,
         require           => [Class['java'],Class['cloudbase_prep']],
         manage_slave_user => false,
         executors         => 1,
-        labels            => $hostname ? {
-                               'hv-compute32','hv-compute38' => 'hv-test',
-                               default                       => 'hyper-v',
-                             },
+        labels            => $jenkins_label,
         masterurl         => 'http://jenkins.openstack.tld:8080',
       }
     }
