@@ -5,6 +5,9 @@ node /jenkins.*/ {
     servers => ['bonehed.lcs.mit.edu'],
   }
   class {'basenode::ipmitools':}
+  package{'mailutils':
+    ensure => present,
+  }
   class {'sensu':}
   class{'sensu_client_plugins': require => Class['sensu'],}
     include jenkins

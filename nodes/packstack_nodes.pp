@@ -40,9 +40,10 @@ node /^(openstack-controller).*/{
     source   => 'git://github.com/cloudbase/unattended-setup-scripts.git',
   }
   vcsrepo {'/usr/local/src/ci-overcloud-init-scripts':
-    ensure   => present,
+    ensure   => latest,
     provider => git,
     source   => 'git://github.com/cloudbase/ci-overcloud-init-scripts.git',
+    revision => 'master',
   }
 
 }

@@ -33,6 +33,13 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         masterurl         => 'http://sandbox01.openstack.tld:8080',
       }
       class{'sensu_client_plugins': require => Class['windows_sensu'],}
+      if !defined (Windows_python::Dependency['PyYAML']){
+        windows_python::dependency{ 'PyYAML':
+          type    => pip,
+          require => Class['cloudbase_prep'],
+        }
+      }
+
     }
     default:{
       notify{"${kernel} on ${fqdn} doesn't belong here":}
@@ -126,27 +133,16 @@ node 'hv-compute01.openstack.tld',
 
       class {'windows_git': before => Class['cloudbase_prep'],}
       class {'cloudbase_prep': }
-      case $hostname {
-        'hv-compute28','hv-compute29','hv-compute32','hv-compute38':{
-           class {'jenkins::slave': 
-             install_java      => false,
-             require           => [Class['java'],Class['cloudbase_prep']],
-             manage_slave_user => false,
-             executors         => 1,
-             labels            => '',
-             masterurl         => 'http://jenkins.openstack.tld:8080',
-           }  
-        }
-        default:{
-          class {'jenkins::slave': 
-            install_java      => false,
-            require           => [Class['java'],Class['cloudbase_prep']],
-            manage_slave_user => false,
-            executors         => 1,
-            labels            => 'hyper-v',
-            masterurl         => 'http://jenkins.openstack.tld:8080',
-          }
-        }
+      class {'jenkins::slave': 
+        install_java      => false,
+        require           => [Class['java'],Class['cloudbase_prep']],
+        manage_slave_user => false,
+        executors         => 1,
+        labels            => $hostname ? {
+                               'hv-compute32','hv-compute38' => 'hv-test',
+                               default                       => 'hyper-v',
+                             },
+        masterurl         => 'http://jenkins.openstack.tld:8080',
       }
     }
     'Linux':{
