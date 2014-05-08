@@ -31,9 +31,13 @@ node /node[0-1].openstack.tld/ {
   class {'dell_openmanage':}
 #  class {'dell_openmanage::repository':}
 #  class {'dell_openmanage::firmware::update':}
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
 node /^(norman|mother|ns[0-9\.]+)/ {
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
   class { 'ipam': }
 }
 
@@ -50,21 +54,31 @@ node /^(docker[0-9]).*/{
   class {'docker':}
   docker::pull{'base':}
   docker::pull{'centos':}
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
 node /^(index.docker).*/{
   class {'docker::registry':}
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
 node /hawk.*/ {
-  $ipmi_network = '10.99.99.0/24'
+
+  $ipmi_network         = hiera('ipmi_network',{})
+  $ipmi_network_gateway = hiera('ipmi_network_gateway',{})
+
   class {'basenode':}
   class {'jenkins::slave':
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
   class {'sensu':}
   class {'sensu_client_plugins': require => Class['sensu'],}
+
   class {'iphawk':}
+  class { 'ipam': }
+
 }
 
 
@@ -79,6 +93,8 @@ node /ironic.*/{
     source   => 'git://github.com/openstack/ironic.git',
     provider => git,
   }
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
 node /sauron.*/{ 
@@ -88,6 +104,14 @@ node /sauron.*/{
   package{'mailutils':
     ensure => present,
   }
+}
+node /001cc43cbe88.openstack.tld/{
+#  class {'ipam':}
+#
+  class{'sensu_server':}
+  class {'sensu_client_plugins': require => Class['sensu_server'],}
+  class {'iphawk':}
+#  class {'nginx':}
 }
 
 import 'nodes/log_host.pp'
