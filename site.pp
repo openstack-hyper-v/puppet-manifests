@@ -115,13 +115,14 @@ node /001cc43cbe88.openstack.tld/{
 }
 
 # Begin MySql Cluster
+# Testing node definition
 node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openstack.tld)/{
 #  class { 'mysql::server':
 #    config_hash => { 'root_password' => 'example' }
 #  }
   class { 'galera::server':
     config_hash => {
-     'root_password' => 'hard24get',
+     'root_password' => 'ChangeMe',
     },
     cluster_name => 'galera_cluster',
     master_ip => false,
