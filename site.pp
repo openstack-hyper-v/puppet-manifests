@@ -108,11 +108,31 @@ node /sauron.*/{
 node /001cc43cbe88.openstack.tld/{
 #  class {'ipam':}
 #
-  class{'sensu_server':}
-  class {'sensu_client_plugins': require => Class['sensu_server'],}
+#  class{'sensu_server':}
+#  class {'sensu_client_plugins': require => Class['sensu_server'],}
   class {'iphawk':}
 #  class {'nginx':}
 }
+
+# Begin MySql Cluster
+node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openstack.tld)/{
+#  class { 'mysql::server':
+#    config_hash => { 'root_password' => 'hard24get' }
+#  }
+  class { 'galera::server':
+    config_hash => {
+     'root_password' => 'hard24get',
+    },
+    cluster_name => 'galera_cluster',
+    master_ip => false,
+    wsrep_sst_username => 'ChangeMe',
+    wsrep_sst_password => 'ChangeMe',
+    wsrep_sst_method => 'rsync',
+ }
+
+}
+# End MySql Cluster
+
 
 import 'nodes/log_host.pp'
 import 'nodes/quartermaster.pp'
@@ -122,10 +142,11 @@ import 'nodes/frankenstein.pp'
 import 'nodes/zuul.pp'
 
 
+import 'nodes/build-host.pp'
+
 import 'nodes/hv-compute.pp'
 import 'nodes/kvm-compute.pp'
 import 'nodes/sandboxes.pp'
 import 'nodes/packstack_nodes.pp'
-
 import 'nodes/switches.pp'
 
