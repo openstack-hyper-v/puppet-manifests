@@ -117,7 +117,7 @@ node /001cc43cbe88.openstack.tld/{
 # Begin MySql Cluster
 node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openstack.tld)/{
 #  class { 'mysql::server':
-#    config_hash => { 'root_password' => 'hard24get' }
+#    config_hash => { 'root_password' => 'example' }
 #  }
   class { 'galera::server':
     config_hash => {
