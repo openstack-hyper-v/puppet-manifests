@@ -27,6 +27,11 @@ node 'pypi' {
     source   => 'git://github.com/openstack-infra/pypi-mirror.git',
   }
 
+  alert('Note: It may take a considerable amount of time to populate the mirror.')
+
+  # Note: These are redhat/centos packages!  Needs further work
+  # to be working on other distros
+
   package{"mysql-devel":
      ensure => latest,
   }
@@ -36,6 +41,38 @@ node 'pypi' {
   }
 
   package{"postgresql-devel":
+     ensure => latest,
+  }
+
+  package{"pcre-devel":
+     ensure => latest,
+  }
+
+  package{"libxml2-devel":
+     ensure => latest,
+  }
+
+  package{"libxslt-devel":
+     ensure => latest,
+  }
+
+  package{"sqlite-devel":
+     ensure => latest,
+  }
+
+  package{"openldap-devel":
+     ensure => latest,
+  }
+
+  package{"zeromq-devel":
+     ensure => latest,
+  }
+
+  package{"gcc-c++":
+     ensure => latest,
+  }
+
+  package{"redhat-lsb-core":
      ensure => latest,
   }
 
@@ -55,9 +92,9 @@ node 'pypi' {
      command     => "run-mirror -c mirror.yaml",
      cwd         => "${mirror_dir}",
      path        => "/usr/bin:/bin",
-     require     => [File["${mirror_dir}/mirror.yaml"],Package['mysql-devel'],],
+     require     => [File["${mirror_dir}/mirror.yaml"],Package["mysql-devel"],Package["python-devel"],Package["postgresql-devel"],Package["pcre-devel"],Package["libxml2-devel"],Package["libxslt-devel"],Package["sqlite-devel"],Package["openldap-devel"],Package["zeromq-devel"],Package["gcc-c++"],Package["redhat-lsb-core"],Package["argparse"],],
      subscribe   => Exec["install-mirror"],
-     timeout     => 3600,
+     timeout     => 7200,
   }
 
   file{"${mirror_dir}/mirror.yaml":
