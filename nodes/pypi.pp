@@ -31,7 +31,11 @@ node 'pypi' {
      ensure => latest,
   }
 
-  package{"gcc":
+  package{"python-devel":
+     ensure => latest,
+  }
+
+  package{"postgresql-devel":
      ensure => latest,
   }
 
@@ -72,6 +76,4 @@ mirrors:
       - https://git.openstack.org/openstack-infra/config
     output: ${pypi_root}/packages/openstack-infra" 
   }
-
-  notify {"${hostname} -- WORK IN PROGRESS!":}
 }
