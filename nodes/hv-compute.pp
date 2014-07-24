@@ -29,8 +29,8 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         require           => [Class['java'],Class['cloudbase_prep']],
         manage_slave_user => false,
         executors         => 1,
-        labels            => 'test',
-        masterurl         => 'http://sandbox01.openstack.tld:8080',
+        labels            => 'hv-staging',
+        masterurl         => 'http://jenkins.openstack.tld:8080',
       }
       class{'sensu_client_plugins': require => Class['windows_sensu'],}
       if !defined (Windows_python::Dependency['PyYAML']){
@@ -54,7 +54,7 @@ node 'hv-compute01.openstack.tld',
      'hv-compute03.openstack.tld',
      'hv-compute04.openstack.tld',
      'hv-compute05.openstack.tld',
-     'hv-compute06.openstack.tld',
+#     'hv-compute06.openstack.tld',
      'hv-compute07.openstack.tld',
      'hv-compute08.openstack.tld',
      'hv-compute09.openstack.tld',
@@ -78,17 +78,14 @@ node 'hv-compute01.openstack.tld',
      'hv-compute31.openstack.tld',
      
      'hv-compute101.openstack.tld',
-     'hv-compute102.openstack.tld',
-#     'hv-compute103.openstack.tld',
-     'hv-compute104.openstack.tld',
+#     'hv-compute104.openstack.tld',
      'hv-compute107.openstack.tld',
 #     'hv-compute108.openstack.tld',
      'hv-compute110.openstack.tld',
-     'hv-compute111.openstack.tld',
-     'hv-compute115.openstack.tld',
-     'hv-compute118.openstack.tld',
-     
+#     'hv-compute111.openstack.tld',
+#     'hv-compute115.openstack.tld',
      'hv-compute117.openstack.tld',
+     'hv-compute118.openstack.tld',
      'hv-compute119.openstack.tld',
      'hv-compute120.openstack.tld',
      'hv-compute122.openstack.tld',
@@ -100,11 +97,11 @@ node 'hv-compute01.openstack.tld',
      'hv-compute128.openstack.tld',
      'hv-compute129.openstack.tld',
      'hv-compute132.openstack.tld',
-     'hv-compute134.openstack.tld',
+#     'hv-compute134.openstack.tld',  # Offline due to intermittant WinRM response
 #     'hv-compute135.openstack.tld',
-     'hv-compute136.openstack.tld',
-     'hv-compute137.openstack.tld',
-     'hv-compute138.openstack.tld',
+#     'hv-compute136.openstack.tld',
+#     'hv-compute137.openstack.tld',  # Offline due to intermittant WinRM response
+#     'hv-compute138.openstack.tld',
      'hv-compute139.openstack.tld'
 {
   case $kernel {

@@ -21,7 +21,11 @@ node default {
      notify {"supported kernel ${kernel} in our infrastructure":}
      @@quartermaster::pxe::file {$macaddress: arp_type => $arp_type, host_macaddress => $host_macaddress,}
    }
-   'Windows':{ notify {"supported kernel ${kernel} in our infrastructure":} }
+   'Windows':{
+     notify {"supported kernel ${kernel} in our infrastructure":}
+     class { 'windows_openssl': }
+     class { 'cloudbase_prep::wsman': require => Class['windows_openssl'],}
+   }
    default:{ notify {"unsupported kernel ${kernel}":} }
   }
 }
@@ -142,7 +146,6 @@ import 'nodes/vpn.pp'
 import 'nodes/frankenstein.pp'
 import 'nodes/zuul.pp'
 
-
 import 'nodes/build-host.pp'
 
 import 'nodes/hv-compute.pp'
@@ -150,4 +153,7 @@ import 'nodes/kvm-compute.pp'
 import 'nodes/sandboxes.pp'
 import 'nodes/packstack_nodes.pp'
 import 'nodes/switches.pp'
+
+import 'nodes/logstash.pp'
+import 'nodes/pypi.pp'
 

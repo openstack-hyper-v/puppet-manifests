@@ -54,7 +54,7 @@ node /jenkins.*/ {
 # Jenkins Job Builder
 # Originating from Openstack-Infra
 # Puppet module provided by Openstack-Hyper-V
-  class {'jenkins_job_builder':}
+#  class {'jenkins_job_builder':}
 
 # Initial security settings.  May be adjusted later.
   $jenkinsconfig_path = '/var/lib/jenkins/'

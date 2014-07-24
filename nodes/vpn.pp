@@ -78,6 +78,18 @@ node /vpn.*/ {
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }
+  openvpn::client {'ClaudiuNesa':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'gabrielloewen':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'mattneely':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
 #  openvpn::client_specific_config {'ppouliot':
 #    server   => 'hypervci',
 #    ifconfig => '10.253.253.1 255.255.255.0',

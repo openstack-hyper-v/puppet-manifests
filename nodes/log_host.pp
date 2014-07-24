@@ -1,5 +1,6 @@
 
-node /logs.*/ {
+#node /logs\.*/ {
+node 'logs' {
   class {'basenode':}
   class {'jenkins::slave':
     masterurl => 'http://jenkins.openstack.tld:8080',
@@ -155,6 +156,48 @@ node /logs.*/ {
       types                => '{text/xml gz;}',
     }
   }
+
+  nginx::resource::location{'~* "\.ini\.gz$"':
+    ensure => present,
+    www_root => '/srv/logs',
+    vhost    => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Encoding gzip',
+      gzip                 => 'off',
+      types                => '{text/plain gz;}',
+    }
+  }
+  nginx::resource::location{'~* "\.conf\.gz$"':
+    ensure => present,
+    www_root => '/srv/logs',
+    vhost    => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Encoding gzip',
+      gzip                 => 'off',
+      types                => '{text/plain gz;}',
+    }
+  }
+  nginx::resource::location{'~* "\.json\.gz$"':
+    ensure => present,
+    www_root => '/srv/logs',
+    vhost    => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Encoding gzip',
+      gzip                 => 'off',
+      types                => '{text/plain gz;}',
+    }
+  }
+  nginx::resource::location{'~* "\.yaml\.gz$"':
+    ensure => present,
+    www_root => '/srv/logs',
+    vhost    => 'logs.openstack.tld',
+    location_cfg_append => {
+      add_header           => 'Content-Encoding gzip',
+      gzip                 => 'off',
+      types                => '{text/plain gz;}',
+    }
+  }
+  
   nginx::resource::location{'~* "\.html\.gz$"':
     ensure => present,
     www_root => '/srv/logs',

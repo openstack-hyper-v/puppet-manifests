@@ -20,6 +20,13 @@ node /quartermaster.*/ {
     source  => 'puppet:///extra_files/sensu',
   }
 
+  # This section added for temporary file hosting needs on HV nodes
+  file{'/srv/install/hv-files/':
+    ensure  => directory,
+    recurse => true,
+    source  => 'puppet:///extra_files/hv-files',
+  }
+
 # This provides the zuul and pip puppet modules that we use on our openstack work
     vcsrepo{'/opt/openstack-infra/config':
       ensure   => present,
