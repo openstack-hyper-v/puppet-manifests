@@ -20,11 +20,31 @@ node default {
    'Linux':{
      notify {"supported kernel ${kernel} in our infrastructure":}
      @@quartermaster::pxe::file {$macaddress: arp_type => $arp_type, host_macaddress => $host_macaddress,}
+     class {'basenode':}
    }
    'Windows':{
      notify {"supported kernel ${kernel} in our infrastructure":}
      class { 'windows_openssl': }
      class { 'cloudbase_prep::wsman': require => Class['windows_openssl'],}
+
+     $q_ip = '10.21.7.22'
+     $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
+     file { "$nfs_location":
+       ensure => directory,
+     }
+     file { "$nfs_location\\${hostname}":
+       ensure => directory,
+       require => File["$nfs_location"],
+     }
+     exec {"${hostname}-facter":
+       command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
+     }
+     file { "$nfs_location\\${hostname}\\facter.yaml":
+       ensure  => file,
+       source  => 'C:\ProgramData\facter.yaml',
+       require => File["$nfs_location\\${hostname}"],
+       subscribe => Exec["${hostname}-facter"],
+     }
    }
    default:{ notify {"unsupported kernel ${kernel}":} }
   }
@@ -40,6 +60,11 @@ node /node[0-1].openstack.tld/ {
 }
 
 node /^(norman|mother|ns[0-9\.]+)/ {
+  include basenode::params
+#  package {$nfs_packages:
+#    ensure => latest,
+#  }
+#  create_resources(basenode::nfs_mounts,$nfs_mounts)
   class {'sensu':}
   class {'sensu_client_plugins': require => Class['sensu'],}
   class { 'ipam': }
@@ -55,6 +80,11 @@ node /^git.*/{
 }
 
 node /^(docker[0-9]).*/{
+  include basenode::params
+  package {$nfs_packages:
+    ensure => latest,
+  }
+  create_resources(basenode::nfs_mounts,$nfs_mounts)
   class {'docker':}
   docker::pull{'base':}
   docker::pull{'centos':}
@@ -63,6 +93,11 @@ node /^(docker[0-9]).*/{
 }
 
 node /^(index.docker).*/{
+  include basenode::params
+  package {$nfs_packages:
+    ensure => latest,
+  }
+  create_resources(basenode::nfs_mounts,$nfs_mounts)
   class {'docker::registry':}
   class {'sensu':}
   class {'sensu_client_plugins': require => Class['sensu'],}
@@ -87,6 +122,11 @@ node /hawk.*/ {
 
 
 node /ironic.*/{
+  include basenode::params
+  package {$nfs_packages:
+    ensure => latest,
+  }
+  create_resources(basenode::nfs_mounts,$nfs_mounts)
   vcsrepo{'/usr/local/src/ironic':
     ensure   => present,
     source   => 'git://github.com/ppouliot/ironic.git',
@@ -110,6 +150,11 @@ node /sauron.*/{
   }
 }
 node /001cc43cbe88.openstack.tld/{
+  include basenode::params
+  package {$nfs_packages:
+    ensure => latest,
+  }
+  create_resources(basenode::nfs_mounts,$nfs_mounts)
 #  class {'ipam':}
 #
 #  class{'sensu_server':}
@@ -121,6 +166,11 @@ node /001cc43cbe88.openstack.tld/{
 # Begin MySql Cluster
 # Testing node definition
 node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openstack.tld)/{
+  include basenode::params
+  package {$nfs_packages:
+    ensure => latest,
+  }
+  create_resources(basenode::nfs_mounts,$nfs_mounts)
 #  class { 'mysql::server':
 #    config_hash => { 'root_password' => 'example' }
 #  }
@@ -138,6 +188,20 @@ node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openst
 }
 # End MySql Cluster
 
+#Begin Memcached
+
+node /eth0-c2-r3-u34.mgmt.colo3.openstack.tld/{
+  class {'basenode':}
+#  package {$nfs_packages:
+#    ensure => latest,
+#  }
+#  create_resources(basenode::nfs_mounts,$nfs_mounts)
+  class { 'memcached': }
+}
+
+node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld){
+  notify {'celso is awesome and is going to build us':}
+}
 
 import 'nodes/log_host.pp'
 import 'nodes/quartermaster.pp'
