@@ -10,12 +10,33 @@ node 'kvm-compute01.openstack.tld',
      'kvm-compute10.openstack.tld',
      'kvm-compute11.openstack.tld',
      'kvm-compute12.openstack.tld',
+     'kvm-compute105.openstack.tld',
+     'c1-r1-u07',
+     'c1-r1-u11',
+     'c1-r1-u17',
+     'c1-r1-u15',
+     'c1-r1-u13',
      'eth0-c2-r3-u03',
+     'eth0-c2-r3-u08',
      'eth0-c2-r3-u20',
-     'eth0-c2-r3-u21'
+     'eth0-c2-r3-u21',
+     'eth0-c2-r3-u22',
+     'eth0-c2-r3-u23',
+#     'eth0-c2-r3-u25', ## possible reassignment as Hopper
+#     'eth0-c2-r3-u27', ## possible reassignment as Hopper
+     'eth0-c2-r3-u39',
+     'eth0-c2-r3-u40'
 {
   class{'basenode':}  
-  class{'dell_openmanage':}
+  #class{'dell_openmanage':}
+  case $bios_vendor {
+    'Dell Inc.':{
+          class{'dell_openmanage':}
+     }
+    default: { notify{"You're not Dell":}}
+
+  }
+
   class{'sensu':}
   class{'sensu_client_plugins': require => Class['sensu'],}
 #  class{'dell_openmanage::firmware::update':}
@@ -37,21 +58,31 @@ node 'kvm-compute01.openstack.tld',
     'kvm-compute05',
     'kvm-compute06':
         { $data_interface = 'em2' }
-    'kvm-compute07',
-    'kvm-compute08',
-    'kvm-compute09',
-    'kvm-compute10',
-    'kvm-compute11':
-        { $data_interface = 'eth1' }
     default: 
-        { notify {"This isn't for ${hostname}":}
-    }
+#    'kvm-compute07',
+#    'kvm-compute08',
+#    'kvm-compute09',
+#    'kvm-compute10',
+#    'kvm-compute11':
+        { $data_interface = 'eth1' }
+#    default: 
+#        { notify {"This isn't for ${hostname}":}
+#    }
   }
   case $hostname {
-    'kvm-compute08',
-    'kvm-compute09',
-    'kvm-compute10',
-    'kvm-compute11':{
+    'kvm-compute01',
+    'kvm-compute02',
+    'kvm-compute03',
+    'kvm-compute04',
+    'kvm-compute05',
+    'kvm-compute06',
+    'kvm-compute07': {}
+
+    default: {
+#    'kvm-compute08',
+#    'kvm-compute09',
+#    'kvm-compute10',
+#    'kvm-compute11':{
        file {'/etc/nova':
        ensure  => directory,
        recurse => true,
@@ -91,9 +122,9 @@ node 'kvm-compute01.openstack.tld',
        source  => "puppet:///extra_files/${data_interface}-neutron/neutron",
      }
     }
-     default: { 
-       #notify {"This isn't for ${hostname}":}
-    }
+#     default: { 
+#       #notify {"This isn't for ${hostname}":}
+#    }
   }
 #  ini_setting {
 #   'reserved_host_disk_mb':
@@ -160,19 +191,22 @@ node 'kvm-compute01.openstack.tld',
 }
 
 
-node #'eth0-c2-r3-u03',
-     'eth0-c2-r3-u08',
-     #'eth0-c2-r3-u20',
-     #'eth0-c2-r3-u21',
-     'eth0-c2-r3-u22',
-     'eth0-c2-r3-u23',
-     'eth0-c2-r3-u25',
-     'eth0-c2-r3-u27',
+node 
+     'eth0-c2-r3-u06',
+     'eth0-c2-r3-u11',
+#     'eth0-c2-r3-u13',
+#     'eth0-c2-r3-u14',
+     'eth0-c2-r3-u16',
      'eth0-c2-r3-u28',
+     'eth0-c2-r3-u30',
+     'eth0-c2-r3-u31',
+     'eth0-c2-r3-u32',
      'eth0-c2-r3-u33',
-     'eth0-c2-r3-u39',
-     'eth0-c2-r3-u40',
 #     '',
+     'c1-r1-u09',
+     'c1-r1-u05',
+     'c1-r1-u03',
+     'c1-r1-u01',
      /^(kvm-compute[0-9]+)/{
   class{'basenode':}  
   #class{'dell_openmanage':}
@@ -243,7 +277,7 @@ node #'eth0-c2-r3-u03',
     mode   => '0644',
     source => "puppet:///modules/packstack/ifcfg-${data_interface}",
   }
-  package {['openstack-nova-compute',
+  package {[
             'openstack-selinux',
             'openstack-neutron-openvswitch',
             'openstack-neutron-linuxbridge',
@@ -261,7 +295,15 @@ node #'eth0-c2-r3-u03',
 
     ensure => 'present',
   }
+  package {'openstack-nova-compute':
+    ensure => '2013.2.3-1.el6',
+  }
 
+  service { 'network':
+     ensure   =>  running,
+     subscribe => File["/etc/sysconfig/network-scripts/ifcfg-${data_interface}"],
+  }
+ 
 # No longer going to ensure these via puppet.  Will instead monitor via Sensu to facilitate investigation, as these should never halt.
   service {
     ['libvirtd',

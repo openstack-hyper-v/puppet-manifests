@@ -1,5 +1,5 @@
 
-node /zuul.*/ {
+node 'zuul.openstack.tld' {
 # class {'zuul':}
   class {'basenode':}
   class {'sensu':}
@@ -29,7 +29,7 @@ notify {"${hostname} we're manually managing for now":}
 }
 
 #node /zuul[0-9]+/ {
-node 'zuul2.openstack.tld' {
+node 'zuul-cinder.openstack.tld' {
 # class {'zuul':}
   class {'basenode':}
   class {'sensu':}

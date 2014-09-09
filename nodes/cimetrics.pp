@@ -21,6 +21,7 @@ node 'cimetrics' {
   include apache
   class {'apache::mod::wsgi':
      wsgi_socket_prefix => '/var/run/wsgi'
+     wsgi_python_path   => "${cimetrics_root}/statsproj/openstack_stats",
   }
   class {'apache::mod::php':}
 
@@ -30,10 +31,9 @@ node 'cimetrics' {
     docroot       => "${cimetrics_root}/statsproj/openstack_stats",
     docroot_owner => 'cimetrics',
     docroot_group => 'cimetrics',
-    wsgi_script_aliases => {'/' => "${cimetrics_root}/statsproj/openstack_stats/wsgi.py"},
+    wsgi_script_aliases => {'/' => "${cimetrics_root}/statsproj/openstack_stats/openstack_stats/wsgi.py"},
     wsgi_process_group  => 'cimetrics',
     wsgi_daemon_process => 'cimetrics user=cimetrics group=cimetrics processes=1 threads=5 maximum-requests=500 umask=0007 display-name=wsgi-cimetrics inactivity-timeout=300',
-    custom_fragment => template('cimetrics/vhost-cimetrics.conf.erb'),
   }
 
   include mysql
@@ -57,7 +57,7 @@ node 'cimetrics' {
      ensure => latest,
   }
 
-  package{"mysql-lib":
+  package{"mysql-libs":
      ensure => latest,
   }
 

@@ -1,6 +1,6 @@
 node 'pypi' {
-  $mirror_dir = "/opt/pypi-mirror";
-  $pypi_root = "/var/pypi";
+  $mirror_dir = "/opt/pypi-mirror"
+  $pypi_root = "/var/pypi"
 
   class {'basenode':}
   class {'sensu':}

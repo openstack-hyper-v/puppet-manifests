@@ -44,12 +44,12 @@ node 'logs' {
     require => Package['open-iscsi'],
   }
   exec {'disable-iscsi-manual':
-    command => "/bin/sed -i 's/node.startup\ =\ manual/#\ node.startup\ =\ manual/g' /etc/iscsi/iscsid.conf",
+    command => '/bin/sed -i "s/node.startup\ =\ manual/#\ node.startup\ =\ manual/g" /etc/iscsi/iscsid.conf',
     require => [Package['open-iscsi'],File['/etc/iscsi/iscsid.conf']],
     unless  => '/bin/grep -c "^#\ node.startup = manual" /etc/iscsi/iscsid.conf', 
   }
   exec {'enable-iscsi-automatic':
-    command => "/bin/sed -i 's/#\ node.startup\ =\ automatic/node.startup\ =\ automatic/g' /etc/iscsi/iscsid.conf",
+    command => '/bin/sed -i "s/#\ node.startup\ =\ automatic/node.startup\ =\ automatic/g" /etc/iscsi/iscsid.conf',
     require => Exec['disable-iscsi-manual'],
     unless  => '/bin/grep -c "^node.startup = automatic" /etc/iscsi/iscsid.conf', 
     notify  => Service['open-iscsi'],

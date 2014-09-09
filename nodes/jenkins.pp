@@ -5,6 +5,11 @@ node /jenkins.*/ {
     servers => ['bonehed.lcs.mit.edu'],
   }
   class {'basenode::ipmitools':}
+#  include basenode::params
+#  package {$nfs_packages:
+#    ensure => latest,
+#  }
+#  create_resources(basenode::nfs_mounts,$nfs_mounts)
   package{'mailutils':
     ensure => present,
   }

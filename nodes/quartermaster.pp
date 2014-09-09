@@ -27,6 +27,25 @@ node /quartermaster.*/ {
     source  => 'puppet:///extra_files/hv-files',
   }
 
+  if (!defined(File["/srv/nfs/hosts"])) {
+    file {"/srv/nfs/hosts":
+      ensure => directory,
+    }
+  }
+
+  if (!defined(File["/srv/nfs/facter"])) {
+    file {"/srv/nfs/facter":
+      ensure => directory,
+      require => File["/srv/nfs/hosts"],
+    }
+  }
+  exec {"facter":
+    command => "/usr/bin/facter -py > /srv/nfs/facter/${hostname}.yaml",
+    creates => "/srv/nfs/facter/${hostname}.yaml",
+    require => File["/srv/nfs/facter"],
+  }
+
+
 # This provides the zuul and pip puppet modules that we use on our openstack work
     vcsrepo{'/opt/openstack-infra/config':
       ensure   => present,

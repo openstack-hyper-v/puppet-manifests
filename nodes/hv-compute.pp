@@ -1,6 +1,10 @@
 node /^hv-compute[0-9]+\.openstack\.tld$/{
   case $kernel {
     'Windows':{
+      File {
+        source_permissions => ignore,
+      }
+
       class {'windows_common':}
       class {'windows_common::configuration::disable_firewalls':}
       class {'windows_common::configuration::disable_auto_update':}
@@ -40,6 +44,25 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         }
       }
 
+      $q_ip = '10.21.7.22'
+      $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
+      file { "${nfs_location}":
+        ensure => directory,
+      }
+      file { "${nfs_location}\\facter":
+        ensure => directory,
+        require => File["$nfs_location"],
+      }
+      exec {"${hostname}-facter":
+        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
+      }
+      file { "${nfs_location}\\facter\\${hostname}.yaml":
+        ensure  => file,
+        source  => 'C:\ProgramData\facter.yaml',
+        require => File["${nfs_location}\\facter"],
+        subscribe => Exec["${hostname}-facter"],
+      }
+
     }
     default:{
       notify{"${kernel} on ${fqdn} doesn't belong here":}
@@ -49,45 +72,53 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
 }
 
 # Limit production nodes to explicitly defined machines.
-node 'hv-compute01.openstack.tld',
-     'hv-compute02.openstack.tld',
-     'hv-compute03.openstack.tld',
-     'hv-compute04.openstack.tld',
+node 
+#     'hv-compute04.openstack.tld', ## reassigned to KVM -> c1-r1-u11
      'hv-compute05.openstack.tld',
-#     'hv-compute06.openstack.tld',
+#     'hv-compute06.openstack.tld', ## reassigned to KVM -> c1-r1-u07
      'hv-compute07.openstack.tld',
      'hv-compute08.openstack.tld',
-     'hv-compute09.openstack.tld',
+#     'hv-compute09.openstack.tld',
 #     'hv-compute10.openstack.tld',
 #     'hv-compute11.openstack.tld',
-     'hv-compute12.openstack.tld',
+#     'hv-compute12.openstack.tld',
      'hv-compute13.openstack.tld',
      'hv-compute14.openstack.tld',
 #     'hv-compute15.openstack.tld',
 #     'hv-compute16.openstack.tld',
-     'hv-compute17.openstack.tld',
+#     'hv-compute17.openstack.tld',
      'hv-compute18.openstack.tld',
      'hv-compute19.openstack.tld',
      'hv-compute20.openstack.tld',
      'hv-compute21.openstack.tld',
-#     'hv-compute22.openstack.tld',
+     'hv-compute22.openstack.tld',
 #     'hv-compute23.openstack.tld',
      'hv-compute26.openstack.tld',
-     'hv-compute27.openstack.tld',
+#     'hv-compute27.openstack.tld',
      'hv-compute30.openstack.tld',
-     'hv-compute31.openstack.tld',
+#     'hv-compute31.openstack.tld',
      
+#     'hv-compute100.openstack.tld', ## assigned as Hopper (ticket system)
      'hv-compute101.openstack.tld',
-#     'hv-compute104.openstack.tld',
+#     'hv-compute103.openstack.tld', ## assigned as build automation node
+     'hv-compute104.openstack.tld',
+#     'hv-compute105.openstack.tld', ## reassigned to KVM -> kvm-compute105
+     'hv-compute106.openstack.tld',
      'hv-compute107.openstack.tld',
-#     'hv-compute108.openstack.tld',
+     'hv-compute108.openstack.tld',
+#     'hv-compute109.openstack.tld', ## assigned as test Hopper (ticket system)
      'hv-compute110.openstack.tld',
-#     'hv-compute111.openstack.tld',
-#     'hv-compute115.openstack.tld',
+#     'hv-compute111.openstack.tld', ## assigned as AD cluster node
+#     'hv-compute112.openstack.tld', ## assigned as AD cluster node
+#     'hv-compute113.openstack.tld', ## assigned as AD cluster node
+#     'hv-compute114.openstack.tld',
+     'hv-compute115.openstack.tld',
+     'hv-compute116.openstack.tld',
      'hv-compute117.openstack.tld',
      'hv-compute118.openstack.tld',
      'hv-compute119.openstack.tld',
      'hv-compute120.openstack.tld',
+#     'hv-compute121.openstack.tld',
      'hv-compute122.openstack.tld',
      'hv-compute123.openstack.tld',
      'hv-compute124.openstack.tld',
@@ -96,16 +127,48 @@ node 'hv-compute01.openstack.tld',
      'hv-compute127.openstack.tld',
      'hv-compute128.openstack.tld',
      'hv-compute129.openstack.tld',
-     'hv-compute132.openstack.tld',
-#     'hv-compute134.openstack.tld',  # Offline due to intermittant WinRM response
-#     'hv-compute135.openstack.tld',
-#     'hv-compute136.openstack.tld',
-#     'hv-compute137.openstack.tld',  # Offline due to intermittant WinRM response
-#     'hv-compute138.openstack.tld',
-     'hv-compute139.openstack.tld'
+#     'hv-compute132.openstack.tld',
+     'hv-compute134.openstack.tld',
+     'hv-compute135.openstack.tld',
+     'hv-compute137.openstack.tld',
+     'hv-compute138.openstack.tld',
+     'hv-compute139.openstack.tld',
+     'hv-compute140.openstack.tld',
+#     'hv-compute143.openstack.tld',
+     'hv-compute147.openstack.tld',
+     'hv-compute149.openstack.tld',
+     'hv-compute150.openstack.tld',
+     'hv-compute151.openstack.tld',
+     'hv-compute152.openstack.tld',
+     'hv-compute153.openstack.tld',
+     'hv-compute154.openstack.tld',
+     'hv-compute155.openstack.tld',
+     'hv-compute156.openstack.tld',
+     'hv-compute157.openstack.tld',
+     'hv-compute158.openstack.tld',
+     'hv-compute160.openstack.tld',
+     'hv-compute161.openstack.tld',
+     'hv-compute162.openstack.tld',
+     'hv-compute163.openstack.tld',
+     'hv-compute164.openstack.tld',
+     'hv-compute167.openstack.tld',
+     'hv-compute168.openstack.tld',
+     'hv-compute170.openstack.tld',
+     'hv-compute174.openstack.tld',
+     'hv-compute177.openstack.tld',
+     'hv-compute178.openstack.tld',
+
+  # HV test nodes.  Special Jenkins label.
+     'hv-compute136.openstack.tld',
+     'hv-compute171.openstack.tld',
+     'hv-compute172.openstack.tld'
 {
   case $kernel {
     'Windows':{
+      File {
+        source_permissions => ignore,
+      }
+
       class {'windows_common':}
       class {'windows_common::configuration::disable_firewalls':}
       class {'windows_common::configuration::disable_auto_update':}
@@ -132,8 +195,9 @@ node 'hv-compute01.openstack.tld',
       class {'cloudbase_prep': }
       
       $jenkins_label = $hostname ? {
-                         'hv-compute32' => 'hv-test',
-                         'hv-compute38' => 'hv-test',
+                         'hv-compute136' => 'hv-test',
+                         'hv-compute171' => 'hv-test',
+                         'hv-compute172' => 'hv-test',
                          default        => 'hyper-v',
                        }
       
@@ -145,6 +209,26 @@ node 'hv-compute01.openstack.tld',
         labels            => $jenkins_label,
         masterurl         => 'http://jenkins.openstack.tld:8080',
       }
+
+      $q_ip = '10.21.7.22'
+      $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
+      file { "${nfs_location}":
+        ensure => directory,
+      }
+      file { "${nfs_location}\\facter":
+        ensure => directory,
+        require => File["$nfs_location"],
+      }
+      exec {"${hostname}-facter":
+        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
+      }
+      file { "${nfs_location}\\facter\\${hostname}.yaml":
+        ensure  => file,
+        source  => 'C:\ProgramData\facter.yaml',
+        require => File["${nfs_location}\\facter"],
+        subscribe => Exec["${hostname}-facter"],
+      }
+
     }
     'Linux':{
        notify{"${kernel} on ${fqdn} is running Linux":}
