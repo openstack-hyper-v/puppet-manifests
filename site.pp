@@ -79,17 +79,23 @@ node /^git.*/{
   class {'gitlab_server': }
 }
 
-node /^(docker[0-9]).*/{
+node /^(docker[0-9]).openstack.tld/{
   include basenode::params
-  package {$nfs_packages:
-    ensure => latest,
+  class {'docker':
+    tcp_bind    => "tcp://${::ipaddress}:4243",
+    socket_bind => 'unix:///var/run/docker.sock',
   }
-  create_resources(basenode::nfs_mounts,$nfs_mounts)
-  class {'docker':}
-  docker::pull{'base':}
-  docker::pull{'centos':}
-  class {'sensu':}
-  class {'sensu_client_plugins': require => Class['sensu'],}
+  docker::image {'base': }
+  docker::image {'ubuntu':
+    image_tag =>  ['trusty']
+  }
+
+  docker::run { 'helloworld':
+    image   => 'trusty',
+    command => '/bin/sh -c "while true; do echo hello world; sleep 1; done"',
+  }
+#  class {'sensu':}
+#  class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
 node /^(index.docker).*/{
@@ -188,19 +194,118 @@ node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openst
 }
 # End MySql Cluster
 
-#Begin Memcached
 
-node /eth0-c2-r3-u34.mgmt.colo3.openstack.tld/{
-  class {'basenode':}
-#  package {$nfs_packages:
-#    ensure => latest,
-#  }
-#  create_resources(basenode::nfs_mounts,$nfs_mounts)
-  class { 'memcached': }
+node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
+
+#  $ad_domain_password    = hiera('ad_passwd',{}),
+
+  File {
+    source_permissions => ignore,
+  }
+
+  class {'windows_common':}
+  class {'windows_common::configuration::disable_firewalls':}
+  class {'windows_common::configuration::enable_auto_update':}
+
+  class {'windows_common::configuration::ntp':
+    before => Class['windows_openssl'],
+  }
+
+  class{'windows_sensu':
+    rabbitmq_password        => 'sensu',
+    rabbitmq_host            => "10.21.7.4",
+    subscriptions            => ["ActiveDirectory"],
+  }
+
+  class {'windows_common::configuration::rdp':}
+  class {'windows_openssl': }
+  class {'windows_git': }
+  class {'cloudbase_prep::wsman': require => Class['windows_openssl'],}
+  class{'sensu_client_plugins': require => Class['windows_sensu'],}
+
+  reboot {'prepare_system':
+    apply => finished,
+  }
+  reboot {'ad_installed':
+    apply => finished,
+  }
+
+  windows_common::configuration::feature { 'Server-Gui-Shell':
+    ensure => absent,
+    notify => Reboot['prepare_system'],
+  }
+  windows_common::configuration::feature { 'DNS':
+    ensure => present,
+    notify => Reboot['prepare_system'],
+  }
+  windows_common::configuration::feature { 'RSAT-DNS-Server':
+    ensure => present,
+    notify => Reboot['prepare_system'],
+  }
+
+  windows_common::configuration::feature { 'RSAT-AD-Tools':
+    ensure => present,
+    notify => Reboot['prepare_system'],
+  }
+
+  windows_common::configuration::feature { 'AD-Domain-Services':
+    ensure => present,
+    require => Windows_common::Configuration::Feature['DNS','RSAT-DNS-Server'],
+    notify => Reboot['prepare_system'],
+  }
+  windows_common::configuration::feature { 'GPMC':
+    ensure => present,
+    notify => Reboot['prepare_system'],
+  }
+
+  case $fqdn {
+    'ad0.openstack.tld':{
+      notify{"My name is ${fqdn}":}
+      notify{"I am the primary domain controller":} warning('I am the primary ad domain controller')
+      class {'windows_domain_controller':
+        domain        => 'forest',
+        domainname    => 'ad.openstack.tld',
+        domainlevel   => '4',
+        forestlevel   => '4',
+        dsrmpassword  => 'H@rd24G3t',
+        notify => Reboot['ad_installed'],
+      }
+    }
+    'ad1.openstack.tld':{
+      notify{"My name is ${fqdn}":}
+      notify{"I am the secondary domain controller":} warning('I am the secondary domain controller')
+      class {'domain_membership':
+        domain       => 'ad.openstack.tld',
+        user         => 'administrator',
+        password     => 'H@rd24G3t',
+        fjoinoptions => '32',
+        notify       => Reboot['prepare_system'],
+      }
+    }
+    'ad2.openstack.tld':{
+      notify{"I am the test domain controller":} warning('I am the test ad domain controller')
+      class {'windows_domain_controller':
+        domain        => 'forest',
+        domainname    => 'adtest.openstack.tld',
+        domainlevel   => '4',
+        forestlevel   => '4',
+        dsrmpassword  => 'H@rd24G3t',
+        notify => Reboot['ad_installed'],
+      }
+    }
+  }
 }
 
-node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld){
-  notify {'celso is awesome and is going to build us':}
+node /jenkins-cinder.openstack.tld/{
+  class {'basenode':}
+  class {'jenkins': }
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
+}
+node /zuul-cinder.openstack.tld/{
+  class {'basenode':}
+  class {'sensu':}
+  class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
 import 'nodes/log_host.pp'
@@ -220,4 +325,3 @@ import 'nodes/switches.pp'
 
 import 'nodes/logstash.pp'
 import 'nodes/pypi.pp'
-
