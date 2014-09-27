@@ -1,3 +1,4 @@
+#
 node /^hv-compute[0-9]+\.openstack\.tld$/{
   case $kernel {
     'Windows':{
@@ -26,6 +27,10 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         interface_address => '10.0.2.*',
       }
 
+      if ($hostname == 'hv-compute114') {
+        class {'windows_freerdp': }
+      }
+
       class {'windows_git': before => Class['cloudbase_prep'],}
       class {'cloudbase_prep': }
       class {'jenkins::slave':
@@ -44,24 +49,24 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         }
       }
 
-      $q_ip = '10.21.7.22'
-      $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
-      file { "${nfs_location}":
-        ensure => directory,
-      }
-      file { "${nfs_location}\\facter":
-        ensure => directory,
-        require => File["$nfs_location"],
-      }
-      exec {"${hostname}-facter":
-        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
-      }
-      file { "${nfs_location}\\facter\\${hostname}.yaml":
-        ensure  => file,
-        source  => 'C:\ProgramData\facter.yaml',
-        require => File["${nfs_location}\\facter"],
-        subscribe => Exec["${hostname}-facter"],
-      }
+#      $q_ip = '10.21.7.22'
+#      $nfs_location = "\\\\${q_ip}\\nfs"
+#      file { "${nfs_location}":
+#        ensure => directory,
+#      }
+#      file { "${nfs_location}\\facter":
+#        ensure => directory,
+#        require => File["$nfs_location"],
+#      }
+#      exec {"${hostname}-facter":
+#        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
+#      }
+#      file { "${nfs_location}\\facter\\${hostname}.yaml":
+#        ensure  => file,
+#        source  => 'C:\ProgramData\facter.yaml',
+#        require => File["${nfs_location}\\facter"],
+#        subscribe => Exec["${hostname}-facter"],
+#      }
 
     }
     default:{
@@ -74,30 +79,47 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
 # Limit production nodes to explicitly defined machines.
 node 
 #     'hv-compute04.openstack.tld', ## reassigned to KVM -> c1-r1-u11
-     'hv-compute05.openstack.tld',
+     'c1-r1-u09.openstack.tld',
 #     'hv-compute06.openstack.tld', ## reassigned to KVM -> c1-r1-u07
-     'hv-compute07.openstack.tld',
-     'hv-compute08.openstack.tld',
+     'c1-r1-u05.openstack.tld',
+     'c1-r1-u03.openstack.tld',
 #     'hv-compute09.openstack.tld',
-#     'hv-compute10.openstack.tld',
-#     'hv-compute11.openstack.tld',
-#     'hv-compute12.openstack.tld',
-     'hv-compute13.openstack.tld',
-     'hv-compute14.openstack.tld',
-#     'hv-compute15.openstack.tld',
-#     'hv-compute16.openstack.tld',
-#     'hv-compute17.openstack.tld',
-     'hv-compute18.openstack.tld',
-     'hv-compute19.openstack.tld',
-     'hv-compute20.openstack.tld',
-     'hv-compute21.openstack.tld',
-     'hv-compute22.openstack.tld',
-#     'hv-compute23.openstack.tld',
+     'c1-r2-u27.openstack.tld',
+     'c1-r2-u26.openstack.tld',
+     'c1-r2-u25.openstack.tld',
+     'c1-r2-u24.openstack.tld',
+     'c1-r2-u23.openstack.tld',
+     'c1-r2-u22.openstack.tld',
+     'c1-r2-u21.openstack.tld',
+     'c1-r2-u20.openstack.tld',
+     'c1-r2-u19.openstack.tld',
+     'c1-r2-u18.openstack.tld',
+     'c1-r2-u17.openstack.tld',
+     'c1-r2-u16.openstack.tld',
+     'c1-r2-u15.openstack.tld',
+     'c1-r2-u14.openstack.tld',
      'hv-compute26.openstack.tld',
-#     'hv-compute27.openstack.tld',
+     'hv-compute27.openstack.tld',
      'hv-compute30.openstack.tld',
-#     'hv-compute31.openstack.tld',
+     'hv-compute31.openstack.tld',
+     'hv-compute33.openstack.tld',
      
+     'c2-r1-u01.openstack.tld',
+     'c2-r1-u02.openstack.tld',
+     'c2-r1-u03.openstack.tld',
+     'c2-r1-u04.openstack.tld',
+     'c2-r1-u05.openstack.tld',
+     'c2-r1-u06.openstack.tld',
+     'c2-r1-u07.openstack.tld',
+     'c2-r1-u08.openstack.tld',
+     'c2-r1-u09.openstack.tld',
+     'c2-r1-u10.openstack.tld',
+     'c2-r1-u11.openstack.tld',
+     'c2-r1-u12.openstack.tld',
+     'c2-r1-u13.openstack.tld',
+     'c2-r2-u02.openstack.tld',
+     'c2-r2-u03.openstack.tld',
+     'c2-r2-u06.openstack.tld',
 #     'hv-compute100.openstack.tld', ## assigned as Hopper (ticket system)
      'hv-compute101.openstack.tld',
 #     'hv-compute103.openstack.tld', ## assigned as build automation node
@@ -126,12 +148,8 @@ node
      'hv-compute126.openstack.tld',
      'hv-compute127.openstack.tld',
      'hv-compute128.openstack.tld',
-     'hv-compute129.openstack.tld',
 #     'hv-compute132.openstack.tld',
-     'hv-compute134.openstack.tld',
-     'hv-compute135.openstack.tld',
      'hv-compute137.openstack.tld',
-     'hv-compute138.openstack.tld',
      'hv-compute139.openstack.tld',
      'hv-compute140.openstack.tld',
 #     'hv-compute143.openstack.tld',
@@ -154,9 +172,6 @@ node
      'hv-compute167.openstack.tld',
      'hv-compute168.openstack.tld',
      'hv-compute170.openstack.tld',
-     'hv-compute174.openstack.tld',
-     'hv-compute177.openstack.tld',
-     'hv-compute178.openstack.tld',
 
   # HV test nodes.  Special Jenkins label.
      'hv-compute136.openstack.tld',
@@ -192,12 +207,48 @@ node
       }
 
       class {'windows_git': before => Class['cloudbase_prep'],}
-      class {'cloudbase_prep': }
       
+      class {'cloudbase_prep': }
+
       $jenkins_label = $hostname ? {
-                         'hv-compute136' => 'hv-test',
-                         'hv-compute171' => 'hv-test',
-                         'hv-compute172' => 'hv-test',
+#                         'hv-compute136' => 'hv-test',
+                         'c1-r1-u09' => 'hv-icehouse',
+                         'c1-r1-u05' => 'hv-icehouse',
+                         'c1-r1-u03' => 'hv-icehouse',
+                         'c1-r2-u27' => 'hv-icehouse',
+                         'c1-r2-u26' => 'hv-icehouse',
+                         'c1-r2-u25' => 'hv-icehouse',
+                         'c1-r2-u24' => 'hv-icehouse',
+                         'c1-r2-u23' => 'hv-icehouse',
+                         'c1-r2-u22' => 'hv-icehouse',
+                         'c1-r2-u21' => 'hv-icehouse',
+                         'c1-r2-u20' => 'hv-icehouse',
+                         'c1-r2-u19' => 'hv-icehouse',
+                         'c1-r2-u18' => 'hv-icehouse',
+                         'c1-r2-u17' => 'hv-icehouse',
+                         'c1-r2-u16' => 'hv-icehouse',
+                         'c1-r2-u15' => 'hv-icehouse',
+                         'c1-r2-u14' => 'hv-icehouse',
+                         'c2-r1-u01' => 'hv-icehouse',
+                         'c2-r1-u02' => 'hv-icehouse',
+                         'c2-r1-u03' => 'hv-icehouse',
+                         'c2-r1-u04' => 'hv-icehouse',
+                         'c2-r1-u05' => 'hv-icehouse',
+                         'c2-r1-u06' => 'hv-icehouse',
+                         #'c2-r1-u07' => 'hv-icehouse',
+                         'c2-r1-u11' => 'hv-icehouse',
+                         'c2-r1-u12' => 'hv-icehouse',
+                         'c2-r1-u13' => 'hv-icehouse',
+                         'c2-r2-u02' => 'hv-icehouse',
+                         'c2-r2-u03' => 'hv-icehouse',
+                         'c2-r2-u06' => 'hv-icehouse',
+                         'hv-compute26' => 'hv-icehouse',
+                         'hv-compute27' => 'hv-icehouse',
+                         'hv-compute30' => 'hv-icehouse',
+                         'hv-compute31' => 'hv-icehouse',
+                         'hv-compute33' => 'hv-icehouse',
+                         'hv-compute171' => 'hv-icehouse',
+                         'hv-compute172' => 'hv-icehouse',
                          default        => 'hyper-v',
                        }
       
@@ -211,7 +262,7 @@ node
       }
 
       $q_ip = '10.21.7.22'
-      $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
+      $nfs_location = "\\\\${q_ip}\\nfs"
       file { "${nfs_location}":
         ensure => directory,
       }

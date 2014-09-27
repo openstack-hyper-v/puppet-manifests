@@ -198,7 +198,7 @@ node
 #     'eth0-c2-r3-u14',
      'eth0-c2-r3-u16',
      'eth0-c2-r3-u28',
-     'eth0-c2-r3-u30',
+#     'eth0-c2-r3-u30',
      'eth0-c2-r3-u31',
      'eth0-c2-r3-u32',
      'eth0-c2-r3-u33',

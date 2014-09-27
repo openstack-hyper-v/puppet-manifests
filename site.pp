@@ -1,13 +1,13 @@
- # case $kernel {
- #   'Windows':{
- #     Jenkins::Slave{
- #       install_java       => false,
- #       manage_slave_user => false, 
- #      }
- #   }
- #   default: { notify {"${kernel} does not require this":}
- #   }
- # }
+# case $kernel {
+#   'Windows':{
+#     Jenkins::Slave{
+#       install_java       => false,
+#       manage_slave_user => false, 
+#      }
+#   }
+#   default: { notify {"${kernel} does not require this":}
+#   }
+# }
 
 
 node default {
@@ -274,13 +274,23 @@ node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
     'ad1.openstack.tld':{
       notify{"My name is ${fqdn}":}
       notify{"I am the secondary domain controller":} warning('I am the secondary domain controller')
-      class {'domain_membership':
-        domain       => 'ad.openstack.tld',
-        user         => 'administrator',
-        password     => 'H@rd24G3t',
-        fjoinoptions => '32',
-        notify       => Reboot['prepare_system'],
+      windows_common::domain::joindomain{'ad.openstack.tld':
+        user_name => 'Administrator',
+        password  => 'H@rd24G3t',
       }
+#      class {'domain_membership':
+#        domain       => 'ad.openstack.tld',
+#        username     => 'administrator',
+#        password     => 'H@rd24G3t',
+#        force        => true,
+#        notify       => Reboot['prepare_system'],
+#      }
+#      class {'windows_domain_controller::additional':
+#        userdomain => 'ad.openstack.tld',
+#        domainuser   => 'administrator',
+#        password   => 'H@rd24G3t',
+#        notify     => Reboot['ad_installed'],
+#      }
     }
     'ad2.openstack.tld':{
       notify{"I am the test domain controller":} warning('I am the test ad domain controller')
@@ -296,16 +306,21 @@ node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
   }
 }
 
-node /jenkins-cinder.openstack.tld/{
+#This will be covered in nodes/jenkins.pp
+#  Work in progress.  Leaving this def in place until complete.  -Tim
+node 'jenkins-cinder.openstack.tld'{
   class {'basenode':}
-  class {'jenkins': }
-  class {'sensu':}
+#  class {'jenkins': configure_firewall => false,}
+  class {'jenkins':}
+  class {'jenkins_security': require => Class['jenkins'],}
+  class {'jenkins_job_builder': require => Class['jenkins_security'],}
+  class {'basenode::ipmitools':}
+  package{'mailutils':
+    ensure => present,
+  }
+  class {'sensu': }
   class {'sensu_client_plugins': require => Class['sensu'],}
-}
-node /zuul-cinder.openstack.tld/{
-  class {'basenode':}
-  class {'sensu':}
-  class {'sensu_client_plugins': require => Class['sensu'],}
+  
 }
 
 import 'nodes/log_host.pp'
