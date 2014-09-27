@@ -1,84 +1,25 @@
-node 'pypi' {
-  $mirror_dir = "/opt/pypi-mirror"
-  $pypi_root = "/var/pypi"
+node 'eth0-c2-r3-u30' {
+  $mirror_dir = "/opt/pypi-mirror";
+  $pypi_port = '80',
+  $pypi_root = '/var/pypi/web',
 
-  class {'basenode':}
-  class {'sensu':}
-  class {'sensu_client_plugins': require => Class['sensu'],}
-
-  firewall {'100 allow http':
-     state  => ['NEW'],
-     port   => '80',
-     proto  => 'tcp',
-     action => 'accept',
+  package{"mercurial":
+     ensure => latest,
   }
-
-  class {'pypi': 
-    pypi_root => "${pypi_root}",
-  }
-
-  file{"${mirror_dir}":
-    ensure => directory,
-  }
-
-  vcsrepo{"${mirror_dir}":
+  
+  vcsrepo { "${mirror_dir}":
     ensure   => present,
-    provider => git,
-    source   => 'git://github.com/openstack-infra/pypi-mirror.git',
+    provider => hg,
+    source   => 'https://bitbucket.org/yamatt/pep381client',
+    require  => Package["mercurial"],
   }
 
-  alert('Note: It may take a considerable amount of time to populate the mirror.')
-
-  # Note: These are redhat/centos packages!  Needs further work
-  # to be working on other distros
-
-  package{"mysql-devel":
-     ensure => latest,
-  }
-
-  package{"python-devel":
-     ensure => latest,
-  }
-
-  package{"postgresql-devel":
-     ensure => latest,
-  }
-
-  package{"pcre-devel":
-     ensure => latest,
-  }
-
-  package{"libxml2-devel":
-     ensure => latest,
-  }
-
-  package{"libxslt-devel":
-     ensure => latest,
-  }
-
-  package{"sqlite-devel":
-     ensure => latest,
-  }
-
-  package{"openldap-devel":
-     ensure => latest,
-  }
-
-  package{"zeromq-devel":
-     ensure => latest,
-  }
-
-  package{"gcc-c++":
-     ensure => latest,
-  }
-
-  package{"redhat-lsb-core":
-     ensure => latest,
-  }
-
-  package{"argparse":
-     provider => pip,
-     ensure   => latest,
+  file { '/var/pypi':
+    ensure  => directory,
+    recurse => true,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
   }
 
   exec{"install-mirror":
@@ -88,29 +29,55 @@ node 'pypi' {
     subscribe   => Vcsrepo["${mirror_dir}"],
   }
 
-  exec{"populate":
-     command     => "run-mirror -c mirror.yaml",
-     cwd         => "${mirror_dir}",
-     path        => "/usr/bin:/bin",
-     require     => [File["${mirror_dir}/mirror.yaml"],Package["mysql-devel"],Package["python-devel"],Package["postgresql-devel"],Package["pcre-devel"],Package["libxml2-devel"],Package["libxslt-devel"],Package["sqlite-devel"],Package["openldap-devel"],Package["zeromq-devel"],Package["gcc-c++"],Package["redhat-lsb-core"],Package["argparse"],],
-     subscribe   => Exec["install-mirror"],
-     timeout     => 7200,
+#  file { "/var/pypi/populate_done.txt":
+#    ensure      => absent,
+#    owner       => 'root',
+#    group       => 'root',
+#    mode        => '0755',
+#    subscribe   => Exec["install-mirror"],
+#    before      => [File["/var/pypi/pypi_populate.txt"],Exec["populate"]],
+#  }
+
+#  file { "/var/pypi/pypi_populate.txt":
+#    ensure      => file,
+#    owner       => 'root',
+#    group       => 'root',
+#    mode        => '0755',
+#    subscribe   => Exec["install-mirror"],
+#    content     => "/usr/bin/pep381run /var/pypi;touch /var/pypi/populate_done.txt",
+#  }
+
+#  exec { "populate":
+#     command     => "at now + 5 minutes -f /var/pypi/pypi_populate.txt",
+#     path        => "/usr/bin:/bin",
+#     require     => File["/var/pypi/pypi_populate.txt"],
+#     subscribe   => Exec["install-mirror"],
+#     refreshonly => true,
+#  }
+
+  cron { 'mirror_pypi':
+    command  => "/usr/bin/pep381run -q /var/pypi",
+    user     => root,
+    hour     => '*',   
+    minute   => '*/15',
+#    require  => File["/var/pypi/populate_done.txt"]
   }
 
-  file{"${mirror_dir}/mirror.yaml":
-    ensure  => file,
-    owner   => 'root',
-    group   => 'root',
-    require => File["${mirror_dir}"],
-    content => "cache-root: /tmp/cache
-mirrors:
-  - name: openstack
-    projects:
-      - https://git.openstack.org/openstack/requirements
-    output: ${pypi_root}/packages/openstack
-  - name: openstack-infra
-    projects:
-      - https://git.openstack.org/openstack-infra/config
-    output: ${pypi_root}/packages/openstack-infra" 
+  class {'nginx':}
+  nginx::resource::vhost { 'eth0-c2-r3-u30.openstack.tld':
+    www_root             => $pypi_root,
+    use_default_location => false,
+    access_log           => '/var/log/nginx/pypi_access.log',
+    error_log            => '/var/log/nginx/pypi_error.log',
+    vhost_cfg_append => {
+      autoindex => on,
+    }
   }
+    
+  nginx::resource::location{'/':
+    ensure => present,
+    www_root => $pypi_root,
+    vhost    => 'eth0-c2-r3-u30.openstack.tld',
+  }
+
 }
