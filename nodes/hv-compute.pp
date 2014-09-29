@@ -27,9 +27,7 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
         interface_address => '10.0.2.*',
       }
 
-      if ($hostname == 'hv-compute114') {
-        class {'windows_freerdp': }
-      }
+      class {'windows_freerdp': }
 
       class {'windows_git': before => Class['cloudbase_prep'],}
       class {'cloudbase_prep': }
@@ -209,6 +207,7 @@ node
       class {'windows_git': before => Class['cloudbase_prep'],}
       
       class {'cloudbase_prep': }
+      class {'windows_freerdp': }
 
       $jenkins_label = $hostname ? {
 #                         'hv-compute136' => 'hv-test',

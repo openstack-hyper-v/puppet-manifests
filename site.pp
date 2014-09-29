@@ -306,6 +306,20 @@ node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
   }
 }
 
+node 'c2-r1-u33.openstack.tld'{
+  warning('this is going to be a vpn server')
+  class{'profiles::vpnserver':}
+}
+node 'c2-r1-u34.openstack.tld'{
+  warning('this is going to be a sensu server')
+  class{'basenode':}
+  class{'sensu_server':}
+  class {'sensu_client_plugins': require => Class['sensu_server'],}
+  package{'mailutils':
+    ensure => present,
+  }
+}
+
 #This will be covered in nodes/jenkins.pp
 #  Work in progress.  Leaving this def in place until complete.  -Tim
 node 'jenkins-cinder.openstack.tld'{
