@@ -64,6 +64,13 @@ node 'pypi' {
     require  => File["/var/pypi/populate_done.txt"]
   }
 
+ cron { 'mirror_logs':
+    command  => "/usr/bin/processlogs /var/pypi /var/pypi/web/pypi.log",
+    user     => root,
+    hour     => '7',
+    minute   => '00',
+ }
+
   class {'nginx':}
   nginx::resource::vhost { 'pypi.openstack.tld':
     www_root             => $pypi_root,

@@ -274,17 +274,13 @@ node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
     'ad1.openstack.tld':{
       notify{"My name is ${fqdn}":}
       notify{"I am the secondary domain controller":} warning('I am the secondary domain controller')
-      windows_common::domain::joindomain{'ad.openstack.tld':
-        user_name => 'Administrator',
-        password  => 'H@rd24G3t',
-      }
-#      class {'domain_membership':
-#        domain       => 'ad.openstack.tld',
-#        username     => 'administrator',
-#        password     => 'H@rd24G3t',
+      class {'domain_membership':
+        domain       => 'ad.openstack.tld',
+        username     => 'administrator',
+        password     => 'H@rd24G3t',
 #        force        => true,
 #        notify       => Reboot['prepare_system'],
-#      }
+      }
 #      class {'windows_domain_controller::additional':
 #        userdomain => 'ad.openstack.tld',
 #        domainuser   => 'administrator',
@@ -336,6 +332,16 @@ node 'jenkins-cinder.openstack.tld'{
   class {'sensu_client_plugins': require => Class['sensu'],}
   
 }
+
+node 'eth0-c2-r3-u40.openstack.tld'{
+  class {'packstack':
+    openstack_release => 'havana',
+    controller_host   => "${ipaddress}",
+    network_host      => "${ipaddress}",
+    kvm_compute_host  => "${ipaddress}",
+  }
+}
+
 
 import 'nodes/log_host.pp'
 import 'nodes/quartermaster.pp'

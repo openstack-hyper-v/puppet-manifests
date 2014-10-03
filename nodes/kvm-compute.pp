@@ -24,8 +24,8 @@ node 'kvm-compute01.openstack.tld',
      'eth0-c2-r3-u23',
 #     'eth0-c2-r3-u25', ## possible reassignment as Hopper
 #     'eth0-c2-r3-u27', ## possible reassignment as Hopper
-     'eth0-c2-r3-u39',
-     'eth0-c2-r3-u40'
+     'eth0-c2-r3-u39'
+#     'eth0-c2-r3-u40'
 {
   class{'basenode':}  
   #class{'dell_openmanage':}

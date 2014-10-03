@@ -98,7 +98,7 @@ node
      'c1-r2-u14.openstack.tld',
      'hv-compute26.openstack.tld',
      'hv-compute27.openstack.tld',
-     'hv-compute30.openstack.tld',
+     #'hv-compute30.openstack.tld',
      'hv-compute31.openstack.tld',
      'hv-compute33.openstack.tld',
      
@@ -229,7 +229,7 @@ node
                          'c1-r2-u15' => 'hv-icehouse',
                          'c1-r2-u14' => 'hv-icehouse',
                          'c2-r1-u01' => 'hv-icehouse',
-                         'c2-r1-u02' => 'hv-icehouse',
+                         #'c2-r1-u02' => 'hv-icehouse',
                          'c2-r1-u03' => 'hv-icehouse',
                          'c2-r1-u04' => 'hv-icehouse',
                          'c2-r1-u05' => 'hv-icehouse',
