@@ -211,6 +211,7 @@ node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
     before => Class['windows_openssl'],
   }
 
+  class{'windows_freerdp':}
   class{'windows_sensu':
     rabbitmq_password        => 'sensu',
     rabbitmq_host            => "10.21.7.4",
@@ -349,6 +350,7 @@ import 'nodes/jenkins.pp'
 import 'nodes/vpn.pp'
 import 'nodes/frankenstein.pp'
 import 'nodes/zuul.pp'
+#import 'nodes/zuul-apache.pp'
 
 import 'nodes/build-host.pp'
 
@@ -356,7 +358,9 @@ import 'nodes/hv-compute.pp'
 import 'nodes/kvm-compute.pp'
 import 'nodes/sandboxes.pp'
 import 'nodes/packstack_nodes.pp'
+import 'nodes/neutron.pp'
 import 'nodes/switches.pp'
 
 import 'nodes/logstash.pp'
 import 'nodes/pypi.pp'
+import 'nodes/download_host.pp'

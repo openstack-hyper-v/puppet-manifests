@@ -1,9 +1,9 @@
 
-node 'zuul.openstack.tld' {
+#node 'zuul0.openstack.tld' {
 # class {'zuul':}
-  class {'basenode':}
-  class {'sensu':}
-  class{'sensu_client_plugins': require => Class['sensu'],}
+#  class {'basenode':}
+#  class {'sensu':}
+#  class{'sensu_client_plugins': require => Class['sensu'],}
 #  class { 'openstack_project::zuul_prod':
 #    jenkins_server       => 'http://jenkins.openstack.tld:8080',
 #    jenkins_user         => 'zuul',
@@ -25,8 +25,8 @@ node 'zuul.openstack.tld' {
 #    source  => "puppet:///modules/openstack_project/zuul/rotate_zuul",
 #  }
 
-notify {"${hostname} we're manually managing for now":}
-}
+#notify {"${hostname} we're manually managing for now":}
+#}
 
 #node /zuul[0-9]+/ {
 node 'zuul-cinder.openstack.tld',
@@ -57,6 +57,7 @@ node 'zuul-cinder.openstack.tld',
   user {'zuul':
     ensure => 'present',
     gid    => 'zuul',
+    managehome => true,
   }
 
   ensure_resource('class', 'python', {'pip' => true })

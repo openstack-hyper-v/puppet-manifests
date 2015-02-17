@@ -24,19 +24,48 @@ node 'kvm-compute01.openstack.tld',
      'eth0-c2-r3-u23',
 #     'eth0-c2-r3-u25', ## possible reassignment as Hopper
 #     'eth0-c2-r3-u27', ## possible reassignment as Hopper
-     'eth0-c2-r3-u39'
+     'eth0-c2-r3-u39',
 #     'eth0-c2-r3-u40'
+# Begin Rack 4
+#    'eth0-c2-r4-u1', #Commented hosts need to be checked in rack 4
+    'eth0-c2-r4-u3',
+    'eth0-c2-r4-u5',
+#    'eth0-c2-r4-u7',
+    'eth0-c2-r4-u9',
+    'eth0-c2-r4-u11',
+    'eth0-c2-r4-u13',
+#    'eth0-c2-r4-u15',
+    'eth0-c2-r4-u17',
+    'eth0-c2-r4-u19',
+#    'eth0-c2-r4-u21',
+    'eth0-c2-r4-u23',
+    'eth0-c2-r4-u25',
+    'eth0-c2-r4-u27',
+    'eth0-c2-r4-u29',
+    'eth0-c2-r4-u31',
+    'eth0-c2-r4-u33',
+    'eth0-c2-r4-u35'
+#    'eth0-c2-r4-u37',
+#    'eth0-c2-r4-u39'
+
 {
+
+  $openstack_controller = '10.21.7.41'
+  $network_controller   = '10.21.7.42'
+  $neutron_password     = '4b39c057433e4ef9'
+
+
   class{'basenode':}  
   #class{'dell_openmanage':}
   case $bios_vendor {
     'Dell Inc.':{
-          class{'dell_openmanage':}
+ #         class{'dell_openmanage':}
      }
     default: { notify{"You're not Dell":}}
 
   }
 
+  
   class{'sensu':}
   class{'sensu_client_plugins': require => Class['sensu'],}
 #  class{'dell_openmanage::firmware::update':}
@@ -46,10 +75,44 @@ node 'kvm-compute01.openstack.tld',
   }
   class {'packstack':
     openstack_release => 'havana',
-    controller_host   => '10.21.7.41',
-    network_host      => '10.21.7.42',
+    controller_host   => $openstack_controller,
+    network_host      => $network_controller,
     kvm_compute_host  => "${ipaddress}",
   }
+  case $hostname {
+    'eth0-c2-r4-u3',
+    'eth0-c2-r4-u5',
+    'eth0-c2-r4-u9',
+    'eth0-c2-r4-u11',
+    'eth0-c2-r4-u13',
+    'eth0-c2-r4-u17',
+    'eth0-c2-r4-u19',
+    'eth0-c2-r4-u23',
+    'eth0-c2-r4-u25',
+    'eth0-c2-r4-u27',
+    'eth0-c2-r4-u29',
+    'eth0-c2-r4-u31',
+    'eth0-c2-r4-u33',
+    'eth0-c2-r4-u35':{
+        class{'packstack::tweaks':}
+
+        package{'kernel':
+          ensure => '3.10.25-11.el6.centos.alt',
+          provider => 'rpm',
+          source   => 'http://hpc.fau.edu/repo/centos/6.5/xen4/x86_64/Packages/kernel-3.10.25-11.el6.centos.alt.x86_64.rpm',
+          require => Class['packstack::tweaks'],
+        }
+    }
+    default:{
+      notice("this doesn't apply to ${hostname}")
+    }
+  }
+
+
+
+
+
+
   case $hostname {
     'kvm-compute01',
     'kvm-compute02',
@@ -57,75 +120,201 @@ node 'kvm-compute01.openstack.tld',
     'kvm-compute04',
     'kvm-compute05',
     'kvm-compute06':
-        { $data_interface = 'em2' }
+        {
+#          $data_interface = 'em2'
+          $if_type = 'em'
+          $if_start = 1
+        }
     default: 
 #    'kvm-compute07',
 #    'kvm-compute08',
 #    'kvm-compute09',
 #    'kvm-compute10',
 #    'kvm-compute11':
-        { $data_interface = 'eth1' }
+        {
+#          $data_interface = 'eth1'
+          $if_type = 'eth'
+          $if_start = 0
+        }
 #    default: 
 #        { notify {"This isn't for ${hostname}":}
 #    }
   }
-  case $hostname {
-    'kvm-compute01',
-    'kvm-compute02',
-    'kvm-compute03',
-    'kvm-compute04',
-    'kvm-compute05',
-    'kvm-compute06',
-    'kvm-compute07': {}
+  $mgmt_interface = "${if_type}${if_start}"
+  $data_interface = "${if_type}${if_start + 1}"
+  notify {"mgmt_interface = '${mgmt_interface}'":}
+  notify {"data_interface = '${data_interface}'":}
+#  case $hostname {
+#    'kvm-compute01',
+#    'kvm-compute02',
+#    'kvm-compute03',
+#    'kvm-compute04',
+#    'kvm-compute05',
+#    'kvm-compute06',
+#    'kvm-compute07': {}
 
-    default: {
+#    default: {
 #    'kvm-compute08',
 #    'kvm-compute09',
 #    'kvm-compute10',
 #    'kvm-compute11':{
+       notify {"Files should happen now...":}
        file {'/etc/nova':
-       ensure  => directory,
-       recurse => true,
+         ensure  => directory,
+         owner   => 'root',
+         group   => 'root',
+#         mode    => '0755',
+#         recurse => true,
+#         source  => 'puppet:///extra_files/nova',
+       }
+       file {'/etc/neutron':
+         ensure  => directory,
+         owner   => 'root',
+         group   => 'root',
+#         mode    => '0755',
+#         recurse => true,
+#         source  => "puppet:///extra_files/${data_interface}-neutron/neutron",
+       }
+
+       file {'/etc/neutron/plugins':
+         ensure  => directory,
+         owner   => 'root',
+         group   => 'root',
+#         mode    => '0755',
+         require => File['/etc/neutron'],
+       }
+       file {'/etc/neutron/plugins/linuxbridge':
+         ensure  => directory,
+         owner   => 'root',
+         group   => 'root',
+#         mode    => '0755',
+         require => File['/etc/neutron/plugins'],
+       }
+
+       file {'/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini':
+         ensure  => file,
+         owner   => 'root',
+         group   => 'neutron',
+         mode    => '0664',
+         content => template('kvm/linuxbridge_conf.ini.erb'),
+         require => File['/etc/neutron/plugins/linuxbridge'],
+       }
+
+       file {'/etc/neutron/plugin.ini':
+         ensure  => link,
+         owner   => 'root',
+         group   => 'neutron',
+         mode    => '0664',
+         target  => '/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini',
+         require => File['/etc/neutron'],
+       }
+
+       file {'/etc/neutron/neutron.conf':
+         ensure  => file,
+         owner   => 'root',
+         group   => 'neutron',
+         mode    => '0664',
+         content => template('kvm/neutron.conf.erb'),
+         require => File['/etc/neutron'],
+       }
+
+       file {'/etc/neutron/rootwrap.conf':
+         ensure  => file,
+         owner   => 'root',
+         group   => 'neutron',
+         mode    => '0644',
+         content => template('kvm/rootwrap.conf.neutron.erb'),
+         require => File['/etc/neutron'],
+       }
+
+       file {'/etc/neutron/policy.json':
+         ensure  => file,
+         owner   => 'root',
+         group   => 'neutron',
+         mode    => '0664',
+         content => template('kvm/policy.json.erb'),
+         require => File['/etc/neutron'],
+       }
+
+     file {'/etc/nova/nova.conf':
+       ensure  => file,
+#       force   => true,
        owner   => 'root',
        group   => 'root',
-       mode    => '0755',
-       source  => 'puppet:///extra_files/nova',
-#      before  => Ini_setting['reserved_host_disk_mb', 'disk_allocation_ratio'],
+       mode    => '0664',
+       content => template('kvm/nova.conf.erb'),
+       require => File['/etc/nova'],
      }
 
-     ini_setting {
-      'vncserver_listen':
-        path   => '/etc/nova/nova.conf',
-        section => 'DEFAULT',
-        setting => 'vncserver_listen',
-        value   => "${ipaddress_eth0}",
-        ensure => present,
-        require => File['/etc/nova'],
-     }
-     
-     ini_setting {
-      'vncserver_proxyclient_address':
-        path   => '/etc/nova/nova.conf',
-        section => 'DEFAULT',
-        setting => 'vncserver_proxyclient_address',
-        value   => "${ipaddress_eth0}",
-        ensure => present,
-        require => File['/etc/nova'],
-     }
-
-     file {'/etc/neutron':
-       ensure  => directory,
-       recurse => true,
+     file {'/etc/testrootwrap.conf':
+       ensure  => absent,
+#       ensure  => file,
+#       force   => true,
        owner   => 'root',
        group   => 'root',
-       mode    => '0755',
-       source  => "puppet:///extra_files/${data_interface}-neutron/neutron",
+       mode    => '0664',
+       content => template('kvm/nova-rootwrap.conf.erb'),
+       require => File['/etc/nova'],
      }
-    }
-#     default: { 
+
+     file {'/etc/testapi-paste.ini':
+       ensure  => absent,
+#       ensure  => file,
+#       force   => true,
+       owner   => 'root',
+       group   => 'root',
+       mode    => '0664',
+       content => template('kvm/nova-api-paste.ini.erb'),
+       require => File['/etc/nova'],
+     }
+
+     file {'/etc/testrelease':
+       ensure  => absent,
+#       ensure  => file,
+#       force   => true,
+       owner   => 'root',
+       group   => 'root',
+       mode    => '0664',
+       content => template('kvm/nova-release.erb'),
+       require => File['/etc/nova'],
+     }
+
+     file {'/etc/testpolicy.json':
+       ensure  => absent,
+#       ensure  => file,
+#       force   => true,
+       owner   => 'root',
+       group   => 'root',
+       mode    => '0664',
+       content => template('kvm/nova-policy.json.erb'),
+       require => File['/etc/nova'],
+     }
+
+#       ini_setting {
+#        'vncserver_listen':
+#          path   => '/etc/nova/nova.conf',
+#          section => 'DEFAULT',
+#          setting => 'vncserver_listen',
+#          value   => "${ipaddress_eth0}",
+#          ensure => present,
+#          require => File['/etc/nova'],
+#       }
+#       
+#       ini_setting {
+#        'vncserver_proxyclient_address':
+#          path   => '/etc/nova/nova.conf',
+#          section => 'DEFAULT',
+#          setting => 'vncserver_proxyclient_address',
+#          value   => "${ipaddress_eth0}",
+#          ensure => present,
+#          require => File['/etc/nova'],
+#       }
+#     }
+#    default: { 
 #       #notify {"This isn't for ${hostname}":}
 #    }
-  }
+#    }
+#  }
 #  ini_setting {
 #   'reserved_host_disk_mb':
 #     path   => '/etc/nova/nova.conf',
@@ -143,13 +332,13 @@ node 'kvm-compute01.openstack.tld',
 #     ensure => present,
 #  }
      
-  file {"/etc/sysconfig/network-scripts/ifcfg-${data_interface}":
-    ensure => file,
-    owner  => '0',
-    group  => '0',
-    mode   => '0644',
-    source => "puppet:///modules/packstack/ifcfg-${data_interface}",
-  }
+#  file {"/etc/sysconfig/network-scripts/ifcfg-${data_interface}":
+#    ensure => file,
+#    owner  => '0',
+#    group  => '0',
+#    mode   => '0644',
+#    source => "puppet:///modules/packstack/ifcfg-${data_interface}",
+#  }
   package {['openstack-nova-compute',
             'openstack-selinux',
             'openstack-neutron-openvswitch',
@@ -199,8 +388,8 @@ node
      'eth0-c2-r3-u16',
      'eth0-c2-r3-u28',
 #     'eth0-c2-r3-u30',
-     'eth0-c2-r3-u31',
-     'eth0-c2-r3-u32',
+#     'eth0-c2-r3-u31',
+#     'eth0-c2-r3-u32',
      'eth0-c2-r3-u33',
 #     '',
      'c1-r1-u09',
@@ -232,14 +421,16 @@ node
     kvm_compute_host  => "${ipaddress}",
   }
   $data_interface = 'eth1'
+
   file {'/etc/nova':
     ensure  => directory,
-    recurse => true,
+#    recurse => true,
     owner   => 'root',
     group   => 'root',
     mode    => '0755',
-    source  => 'puppet:///extra_files/nova',
+#    source  => 'puppet:///extra_files/nova',
   }
+
 
   ini_setting {
    'vncserver_listen':

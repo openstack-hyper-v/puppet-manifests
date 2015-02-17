@@ -1,11 +1,13 @@
 
-#node /logs\.*/ {
-node 'logs' {
+node /logs\d*/ {
+#node 'logs' {
   class {'basenode':}
   class {'jenkins::slave':
     masterurl => 'http://jenkins.openstack.tld:8080',
   }
-  class {'sensu':}
+  class {'sensu':
+    version => '0.12.6-1',
+  }
   class{'sensu_client_plugins': require => Class['sensu'],}
   user {'logs':
     ensure     => present,
@@ -36,57 +38,77 @@ node 'logs' {
     require => User['logs'],
   }
 
-  package {'open-iscsi':
-    ensure => latest,
-  }
-  file {'/etc/iscsi/iscsid.conf':
+  package {'git':
     ensure => present,
-    require => Package['open-iscsi'],
   }
-  exec {'disable-iscsi-manual':
-    command => '/bin/sed -i "s/node.startup\ =\ manual/#\ node.startup\ =\ manual/g" /etc/iscsi/iscsid.conf',
-    require => [Package['open-iscsi'],File['/etc/iscsi/iscsid.conf']],
-    unless  => '/bin/grep -c "^#\ node.startup = manual" /etc/iscsi/iscsid.conf', 
-  }
-  exec {'enable-iscsi-automatic':
-    command => '/bin/sed -i "s/#\ node.startup\ =\ automatic/node.startup\ =\ automatic/g" /etc/iscsi/iscsid.conf',
-    require => Exec['disable-iscsi-manual'],
-    unless  => '/bin/grep -c "^node.startup = automatic" /etc/iscsi/iscsid.conf', 
-    notify  => Service['open-iscsi'],
-  }
-  service {'open-iscsi':
-    ensure => running,
-    require => Package['open-iscsi'],
-  }
-  exec {'iscsi-discovery-equallogic':
-    command   => '/usr/bin/iscsiadm -m discovery -t st -p equallogic.openstack.tld',
-    require   => [Package['open-iscsi'],
-                  File['/etc/iscsi/iscsid.conf'],
-                  Exec['enable-iscsi-automatic']],
-    logoutput => true,
-  }
-  exec {'iscsi-login-equallogic':
-    command   => '/usr/bin/iscsiadm -m node --login',
-    require   => Exec['iscsi-discovery-equallogic'],
-    logoutput => true,
-    creates   => ['/etc/iscsi/nodes/iqn.2001-05.com.equallogic\:0-8a0906-dfe8e5504-d590000001452f3f-tempest-logs/10.21.7.251\,3260\,1/default',
-                  '/dev/sda'],
-  }
+ 
+  file { '/etc/cron.hourly/sync_logs_with_master':
+    ensure => $::hostname ? {
+      'logs'  => absent,
+      default => file,
+    },
+    mode    => 755,
+    content => '#!/bin/sh
+rsync -aqze ssh logs:/srv/logs/ /srv/logs
+',
+  } 
 
+  if ($::is_virtual == 'true') {
+    notify{"This is a VM Logs host...": }
 
-  file {'/etc/fstab':
-    ensure => present,
-  } -> 
-  file_line {'tempest-logs':
-    line => '/dev/mapper/log--storage-storage  /srv/logs       ext4    defaults,auto,_netdev 0 0',
-    path => '/etc/fstab',
-    require => [Exec['iscsi-login-equallogic'],File['/srv/logs']],
-  }
-  exec {'remount-iscsi-volume':
-    command => '/bin/mount -a',
-    require => File_line['tempest-logs'],
-  }
+    package {'open-iscsi':
+      ensure => latest,
+    }
+    file {'/etc/iscsi/iscsid.conf':
+      ensure => present,
+      require => Package['open-iscsi'],
+    }
+    exec {'disable-iscsi-manual':
+      command => '/bin/sed -i "s/node.startup\ =\ manual/#\ node.startup\ =\ manual/g" /etc/iscsi/iscsid.conf',
+      require => [Package['open-iscsi'],File['/etc/iscsi/iscsid.conf']],
+      unless  => '/bin/grep -c "^#\ node.startup = manual" /etc/iscsi/iscsid.conf', 
+    }
+    exec {'enable-iscsi-automatic':
+      command => '/bin/sed -i "s/#\ node.startup\ =\ automatic/node.startup\ =\ automatic/g" /etc/iscsi/iscsid.conf',
+      require => Exec['disable-iscsi-manual'],
+      unless  => '/bin/grep -c "^node.startup = automatic" /etc/iscsi/iscsid.conf', 
+      notify  => Service['open-iscsi'],
+    }
+    service {'open-iscsi':
+      ensure => running,
+      require => Package['open-iscsi'],
+    }
+    exec {'iscsi-discovery-equallogic':
+      command   => '/usr/bin/iscsiadm -m discovery -t st -p equallogic.openstack.tld',
+      require   => [Package['open-iscsi'],
+                    File['/etc/iscsi/iscsid.conf'],
+                    Exec['enable-iscsi-automatic']],
+      logoutput => true,
+    }
+    exec {'iscsi-login-equallogic':
+      command   => '/usr/bin/iscsiadm -m node --login',
+      require   => Exec['iscsi-discovery-equallogic'],
+      logoutput => true,
+      creates   => ['/etc/iscsi/nodes/iqn.2001-05.com.equallogic\:0-8a0906-dfe8e5504-d590000001452f3f-tempest-logs/10.21.7.251\,3260\,1/default',
+                    '/dev/sda'],
+    }
   
+  
+    file {'/etc/fstab':
+      ensure => present,
+    } -> 
+    file_line {'tempest-logs':
+      line => '/dev/mapper/log--storage-storage  /srv/logs       ext4    defaults,auto,_netdev 0 0',
+      path => '/etc/fstab',
+      require => [Exec['iscsi-login-equallogic'],File['/srv/logs']],
+    }
+    exec {'remount-iscsi-volume':
+      command => '/bin/mount -a',
+      require => File_line['tempest-logs'],
+    }
+
+  }  
+
   package {'apparmor-utils':
     ensure => latest,
   }
@@ -133,6 +155,7 @@ node 'logs' {
   }
 
   class {'nginx':}
+#  nginx::config::nx_daemon_user = 'nginx'
   nginx::resource::vhost { 'logs.openstack.tld':
     www_root         => '/srv/logs',
     use_default_location => false,

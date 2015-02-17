@@ -46,6 +46,11 @@ node /^(openstack-controller).*/{
     revision => 'master',
   }
 
+  package {'pywinrm':
+    ensure   => latest,
+    provider => pip,
+  }
+
 }
 node /^(neutron-controller).*/{
   class{'basenode':}  
