@@ -317,23 +317,6 @@ node 'c2-r1-u34.openstack.tld'{
   }
 }
 
-#This will be covered in nodes/jenkins.pp
-#  Work in progress.  Leaving this def in place until complete.  -Tim
-node 'jenkins-cinder.openstack.tld'{
-  class {'basenode':}
-#  class {'jenkins': configure_firewall => false,}
-  class {'jenkins':}
-  class {'jenkins_security': require => Class['jenkins'],}
-  class {'jenkins_job_builder': require => Class['jenkins_security'],}
-  class {'basenode::ipmitools':}
-  package{'mailutils':
-    ensure => present,
-  }
-  class {'sensu': }
-  class {'sensu_client_plugins': require => Class['sensu'],}
-  
-}
-
 node 'eth0-c2-r3-u40.openstack.tld'{
   class {'packstack':
     openstack_release => 'havana',

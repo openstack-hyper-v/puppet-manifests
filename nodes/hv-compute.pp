@@ -77,31 +77,33 @@ node /^hv-compute[0-9]+\.openstack\.tld$/{
 
 # Limit production nodes to explicitly defined machines.
 node 
-#     'hv-compute04.openstack.tld', ## reassigned to KVM -> c1-r1-u11
-     'c1-r1-u09.openstack.tld',
-#     'hv-compute06.openstack.tld', ## reassigned to KVM -> c1-r1-u07
-     'c1-r1-u05.openstack.tld',
-     'c1-r1-u03.openstack.tld',
-#     'hv-compute09.openstack.tld',
-     'c1-r2-u27.openstack.tld',
-     'c1-r2-u26.openstack.tld',
-     'c1-r2-u25.openstack.tld',
-     'c1-r2-u24.openstack.tld', ## errors on node, requires review/reconfig
-     'c1-r2-u23.openstack.tld',
-     'c1-r2-u22.openstack.tld',
-     'c1-r2-u21.openstack.tld',
-     'c1-r2-u20.openstack.tld',
-     'c1-r2-u19.openstack.tld',
-     'c1-r2-u18.openstack.tld',
-     'c1-r2-u17.openstack.tld',
-     'c1-r2-u16.openstack.tld',
-     'c1-r2-u15.openstack.tld',
-     'c1-r2-u14.openstack.tld',
-     'hv-compute26.openstack.tld',
-     'hv-compute27.openstack.tld',
-     #'hv-compute30.openstack.tld',
-     'hv-compute31.openstack.tld',
-     'hv-compute33.openstack.tld',
+
+## All 1Mem (c1) nodes disabled against use in production
+##     'hv-compute04.openstack.tld', ## reassigned to KVM -> c1-r1-u11
+#     'c1-r1-u09.openstack.tld',
+##     'hv-compute06.openstack.tld', ## reassigned to KVM -> c1-r1-u07
+#     'c1-r1-u05.openstack.tld',
+#     'c1-r1-u03.openstack.tld',
+##     'hv-compute09.openstack.tld',
+#     'c1-r2-u27.openstack.tld',
+#     'c1-r2-u26.openstack.tld',
+#     'c1-r2-u25.openstack.tld',
+#     'c1-r2-u24.openstack.tld', ## errors on node, requires review/reconfig
+#     'c1-r2-u23.openstack.tld',
+#     'c1-r2-u22.openstack.tld',
+#     'c1-r2-u21.openstack.tld',
+#     'c1-r2-u20.openstack.tld',
+#     'c1-r2-u19.openstack.tld',
+#     'c1-r2-u18.openstack.tld',
+#     'c1-r2-u17.openstack.tld',
+#     'c1-r2-u16.openstack.tld',
+#     'c1-r2-u15.openstack.tld',
+#     'c1-r2-u14.openstack.tld',
+#     'hv-compute26.openstack.tld',
+#     'hv-compute27.openstack.tld',
+#     #'hv-compute30.openstack.tld',
+#     'hv-compute31.openstack.tld',
+#     'hv-compute33.openstack.tld',
      
      'c2-r1-u01.openstack.tld',
      'c2-r1-u02.openstack.tld', ## Fails to respond to WSMan -- Timeout
@@ -113,13 +115,41 @@ node
      'c2-r1-u08.openstack.tld', ## Fails to respond to WSMan -- Timeout
      'c2-r1-u09.openstack.tld', ## Fails to respond to WSMan -- Timeout
      'c2-r1-u10.openstack.tld', ## Fails to respond to WSMan -- Timeout
-     'c2-r1-u11.openstack.tld', ## errors on node, requires review/reconfig
+     'c2-r1-u11.openstack.tld', ## errors on node, requires review/reconfig > "In review, 2015-03-17"-Tim
      'c2-r1-u12.openstack.tld',
      'c2-r1-u13.openstack.tld',
+## node status issue--     'c2-r1-u14.openstack.tld',
+## node status issue--     'c2-r1-u15.openstack.tld',
+     'c2-r1-u16.openstack.tld',
+     'c2-r1-u17.openstack.tld',
+## node status issue--     'c2-r1-u18.openstack.tld',
+## node status issue--     'c2-r1-u19.openstack.tld',
+## node status issue--     'c2-r1-u20.openstack.tld',
+     'c2-r1-u21.openstack.tld',
+     'c2-r1-u22.openstack.tld',
+     'c2-r1-u23.openstack.tld',
+     'c2-r1-u24.openstack.tld',
+     'c2-r1-u25.openstack.tld',
+     'c2-r1-u26.openstack.tld',
+#     'c2-r1-u27.openstack.tld',  ## assigned as AD cluster node
+#     'c2-r1-u28.openstack.tld',  ## assigned as AD cluster node
+#     'c2-r1-u29.openstack.tld',  ## assigned as AD cluster node
+## node status issue--     'c2-r1-u30.openstack.tld',
+#     'c2-r1-u31.openstack.tld',  ## assigned as Docker
+     'c2-r1-u32.openstack.tld',
+#     'c2-r1-u33.openstack.tld',  ## defined elsewhere
+#     'c2-r1-u34.openstack.tld',
+     'c2-r1-u36.openstack.tld',
+#     'c2-r1-u37.openstack.tld',  ## assigned as build automation node
+     'c2-r1-u38.openstack.tld',
+     'c2-r1-u39.openstack.tld',
+#     'c2-r1-u40.openstack.tld',  ## assigned as Hopper (ticket system)
+
      'c2-r2-u02.openstack.tld',
      'c2-r2-u03.openstack.tld',
      'c2-r2-u05.openstack.tld',
      'c2-r2-u06.openstack.tld',
+     'c2-r2-u10.openstack.tld',
      'c2-r2-u12.openstack.tld',
      'c2-r2-u15.openstack.tld', ## Fails to respond to WSMan -- Host unreachable
      'c2-r2-u16.openstack.tld',
@@ -171,12 +201,12 @@ node
 #     'hv-compute143.openstack.tld',
      'hv-compute147.openstack.tld', ## Fails to respond to WSMan -- Host unreachable
      'hv-compute149.openstack.tld',
+     'hv-compute159.openstack.tld',
      'hv-compute162.openstack.tld', ## Fails to respond to WSMan -- Actively refused
      'hv-compute167.openstack.tld', ## Fails to respond to WSMan -- Actively refused
      'hv-compute170.openstack.tld', ## Fails to respond to WSMan -- Timeout
 
   # HV test nodes.  Special Jenkins label.
-     'hv-compute136.openstack.tld', ## Fails to respond to WSMan -- DNS
      'hv-compute171.openstack.tld',
      'hv-compute172.openstack.tld'
 {
@@ -214,114 +244,111 @@ node
       class {'cloudbase_prep': }
       class {'windows_freerdp': }
 
-      $python_logging_file = 'c:/Python27/Lib/logging/__init__.py'
-      if (!defined(File[$python_logging_file])) {
-        file {$python_logging_file:
-          ensure  => present,
-          require => Class['cloudbase_prep'],
-        }
-      }
+#      $python_logging_file = 'c:/Python27/Lib/logging/__init__.py'
+#      if (!defined(File[$python_logging_file])) {
+#        file {$python_logging_file:
+#          ensure  => present,
+#          require => Class['cloudbase_prep'],
+#        }
+#      }
+#
+#      exec {'fix_python_logging_threading':
+#        provider => powershell,
+#        command  => "
+#          \$newcontent = ((([IO.File]::ReadAllText('${python_logging_file}')) -creplace '(except ImportError:[\\n\\s]+thread = None)([\\n\\s]+?)(\\r\\n)(?:from eventlet import patcher[\\n\\s]+thread = patcher.original(''thread'')[\\n\\s]+threading = patcher.original(''threading'')[\\n\\s]+)?__author__','\$1\$2\$3from eventlet import patcher\$3thread = patcher.original(''thread'')\$3threading = patcher.original(''threading'')\$2\$3__author__') -creplace 'test-Tim','')
+#          [IO.File]::WriteAllText('${python_logging_file}',\$newcontent)
+#        ",
+#        require => File[$python_logging_file],
+#      }
 
-      exec {'fix_python_logging_threading':
-        provider => powershell,
-        command  => "
-          \$newcontent = ((([IO.File]::ReadAllText('${python_logging_file}')) -creplace '(except ImportError:[\\n\\s]+thread = None)([\\n\\s]+?)(\\r\\n)(?:from eventlet import patcher[\\n\\s]+thread = patcher.original(''thread'')[\\n\\s]+threading = patcher.original(''threading'')[\\n\\s]+)?__author__','\$1\$2\$3from eventlet import patcher\$3thread = patcher.original(''thread'')\$3threading = patcher.original(''threading'')\$2\$3__author__') -creplace 'test-Tim','')
-          [IO.File]::WriteAllText('${python_logging_file}',\$newcontent)
-        ",
-        require => File[$python_logging_file],
-      }
-
-      file_line{'Tim_line_fix':
-        path => $python_logging_file,
-        line => 'test-Tim',
-        ensure => absent,
-      }
-
-      $jenkins_label = $hostname ? {
-#                         'hv-compute136' => 'hv-test',
-                         'c1-r1-u03' => 'hv-icehouse',
-                         'c1-r1-u05' => 'hv-icehouse',
-                         'c1-r1-u09' => 'hv-icehouse',
-                         'c1-r2-u27' => 'hv-icehouse',
-                         'c1-r2-u26' => 'hv-icehouse',
-                         #'c1-r2-u25' => 'hv-icehouse',
-#                         'c1-r2-u24' => 'hv-icehouse',
-                         'c1-r2-u23' => 'hv-icehouse',
-                         'c1-r2-u22' => 'hv-icehouse',
-                         'c1-r2-u21' => 'hv-icehouse',
-                         'c1-r2-u20' => 'hv-icehouse',
-                         'c1-r2-u19' => 'hv-icehouse',
-                         'c1-r2-u18' => 'hv-icehouse',
-                         #'c1-r2-u17' => 'hv-icehouse',
-                         'c1-r2-u16' => 'hv-icehouse',
-                         'c1-r2-u15' => 'hv-icehouse',
-                         'c1-r2-u14' => 'hv-icehouse',
-                         'c2-r1-u01' => 'hv-icehouse',
-#                         'c2-r1-u02' => 'hv-icehouse',
-                         'c2-r1-u03' => 'hv-icehouse',
-                         'c2-r1-u04' => 'hv-icehouse',
-                         'c2-r1-u05' => 'hv-icehouse',
-                         'c2-r1-u06' => 'hv-icehouse',
-#                         'c2-r1-u07' => 'hv-icehouse',
-                         'c2-r1-u11' => 'hv-icehouse',
-                         'c2-r1-u12' => 'hv-icehouse',
-                         'c2-r1-u13' => 'hv-icehouse',
-                         'c2-r2-u02' => 'hv-icehouse',
-                         'c2-r2-u03' => 'hv-icehouse',
-                         'c2-r2-u05' => 'hv-icehouse',
-                         'c2-r2-u06' => 'hv-icehouse',
-                         'c2-r2-u12' => 'hv-icehouse',
-                         'c2-r2-u16' => 'hv-icehouse',
-                         #'c2-r2-u17' => 'hv-icehouse',
-                         'c2-r2-u19' => 'hv-icehouse',
-#                         'c2-r2-u20' => 'hv-icehouse',
-                         'c2-r2-u22' => 'hv-icehouse',
-                         'c2-r2-u23' => 'hv-icehouse',
-                         'c2-r2-u24' => 'hv-icehouse',
-                         'c2-r2-u25' => 'hv-icehouse',
-                         'c2-r2-u26' => 'hv-icehouse',
-                         'c2-r2-u30' => 'hv-icehouse',
-                         'c2-r2-u31' => 'hv-icehouse',
-                         'c2-r2-u35' => 'hv-icehouse',
-                         'c2-r2-u37' => 'hv-icehouse',
-                         'c2-r2-u38' => 'hv-icehouse',
-                         'hv-compute26' => 'hv-icehouse',
-                         'hv-compute27' => 'hv-icehouse',
-                         #'hv-compute30' => 'hv-icehouse',
-                         'hv-compute31' => 'hv-icehouse',
-                         'hv-compute33' => 'hv-icehouse',
-                         'hv-compute171' => 'hv-icehouse',
-                         'hv-compute172' => 'hv-icehouse',
-                         default        => 'hyper-v',
-                       }
+#      $jenkins_label = $hostname ? {
+##                         'hv-compute136' => 'hv-test',
+#                         'c1-r1-u03' => 'hv-icehouse',
+#                         'c1-r1-u05' => 'hv-icehouse',
+#                         'c1-r1-u09' => 'hv-icehouse',
+#                         'c1-r2-u27' => 'hv-icehouse',
+#                         'c1-r2-u26' => 'hv-icehouse',
+#                         #'c1-r2-u25' => 'hv-icehouse',
+##                         'c1-r2-u24' => 'hv-icehouse',
+#                         'c1-r2-u23' => 'hv-icehouse',
+#                         'c1-r2-u22' => 'hv-icehouse',
+#                         'c1-r2-u21' => 'hv-icehouse',
+#                         'c1-r2-u20' => 'hv-icehouse',
+#                         'c1-r2-u19' => 'hv-icehouse',
+#                         'c1-r2-u18' => 'hv-icehouse',
+#                         #'c1-r2-u17' => 'hv-icehouse',
+#                         'c1-r2-u16' => 'hv-icehouse',
+#                         'c1-r2-u15' => 'hv-icehouse',
+#                         'c1-r2-u14' => 'hv-icehouse',
+#                         'c2-r1-u01' => 'hv-icehouse',
+##                         'c2-r1-u02' => 'hv-icehouse',
+#                         'c2-r1-u03' => 'hv-icehouse',
+#                         'c2-r1-u04' => 'hv-icehouse',
+#                         'c2-r1-u05' => 'hv-icehouse',
+#                         'c2-r1-u06' => 'hv-icehouse',
+###                         'c2-r1-u07' => 'hv-icehouse',
+###                         'c2-r1-u08' => 'hv-icehouse',
+###                         'c2-r1-u09' => 'hv-icehouse',
+###                         'c2-r1-u10' => 'hv-icehouse',
+###                         'c2-r1-u11' => 'hv-icehouse',
+#                         'c2-r1-u12' => 'hv-icehouse',
+#                         'c2-r1-u13' => 'hv-icehouse',
+###                         'c2-r2-u02' => 'hv-icehouse',
+#                         'c2-r2-u03' => 'hv-icehouse',
+#                         'c2-r2-u05' => 'hv-icehouse',
+#                         'c2-r2-u06' => 'hv-icehouse',
+#                         'c2-r2-u12' => 'hv-icehouse',
+###                         'c2-r2-u16' => 'hv-icehouse',
+###                         'c2-r2-u17' => 'hv-icehouse',
+#                         'c2-r2-u19' => 'hv-icehouse',
+###                         'c2-r2-u20' => 'hv-icehouse',
+#                         'c2-r2-u22' => 'hv-icehouse',
+#                         'c2-r2-u23' => 'hv-icehouse',
+#                         'c2-r2-u24' => 'hv-icehouse',
+#                         'c2-r2-u25' => 'hv-icehouse',
+#                         'c2-r2-u26' => 'hv-icehouse',
+#                         'c2-r2-u30' => 'hv-icehouse',
+#                         'c2-r2-u31' => 'hv-icehouse',
+#                         'c2-r2-u35' => 'hv-icehouse',
+#                         'c2-r2-u37' => 'hv-icehouse',
+#                         'c2-r2-u38' => 'hv-icehouse',
+#                         'hv-compute26' => 'hv-icehouse',
+#                         'hv-compute27' => 'hv-icehouse',
+#                         #'hv-compute30' => 'hv-icehouse',
+#                         'hv-compute31' => 'hv-icehouse',
+#                         'hv-compute33' => 'hv-icehouse',
+#                         'hv-compute171' => 'hv-baseline',
+#                         'hv-compute172' => 'hv-baseline',
+#                         default        => 'hyper-v',
+#                       }
       
       class {'jenkins::slave': 
         install_java      => false,
         require           => [Class['java'],Class['cloudbase_prep']],
         manage_slave_user => false,
         executors         => 1,
-        labels            => $jenkins_label,
+#        labels            => $jenkins_label,
         masterurl         => 'http://jenkins.openstack.tld:8080',
       }
 
-      $q_ip = '10.21.7.22'
-      $nfs_location = "\\\\${q_ip}\\nfs"
-      file { "${nfs_location}":
-        ensure => directory,
-      }
-      file { "${nfs_location}\\facter":
-        ensure => directory,
-        require => File["$nfs_location"],
-      }
-      exec {"${hostname}-facter":
-        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
-      }
-      file { "${nfs_location}\\facter\\${hostname}.yaml":
-        ensure  => file,
-        source  => 'C:\ProgramData\facter.yaml',
-        require => File["${nfs_location}\\facter"],
-        subscribe => Exec["${hostname}-facter"],
-      }
+#      $q_ip = '10.21.7.22'
+#      $nfs_location = "\\\\${q_ip}\\nfs"
+#      file { "${nfs_location}":
+#        ensure => directory,
+#      }
+#      file { "${nfs_location}\\facter":
+#        ensure => directory,
+#        require => File["$nfs_location"],
+#      }
+#      exec {"${hostname}-facter":
+#        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
+#      }
+#      file { "${nfs_location}\\facter\\${hostname}.yaml":
+#        ensure  => file,
+#        source  => 'C:\ProgramData\facter.yaml',
+#        require => File["${nfs_location}\\facter"],
+#        subscribe => Exec["${hostname}-facter"],
+#      }
 
     }
     'Linux':{

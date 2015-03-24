@@ -28,10 +28,10 @@ node 'kvm-compute01.openstack.tld',
 #     'eth0-c2-r3-u40'
 # Begin Rack 4
 #    'eth0-c2-r4-u1', #Commented hosts need to be checked in rack 4
-    'eth0-c2-r4-u3',
-    'eth0-c2-r4-u5',
-#    'eth0-c2-r4-u7',
-    'eth0-c2-r4-u9',
+    'eth0-c2-r4-u03',
+    'eth0-c2-r4-u05',
+#    'eth0-c2-r4-u07',
+    'eth0-c2-r4-u09',
     'eth0-c2-r4-u11',
     'eth0-c2-r4-u13',
 #    'eth0-c2-r4-u15',
@@ -80,9 +80,9 @@ node 'kvm-compute01.openstack.tld',
     kvm_compute_host  => "${ipaddress}",
   }
   case $hostname {
-    'eth0-c2-r4-u3',
-    'eth0-c2-r4-u5',
-    'eth0-c2-r4-u9',
+    'eth0-c2-r4-u03',
+    'eth0-c2-r4-u05',
+    'eth0-c2-r4-u09',
     'eth0-c2-r4-u11',
     'eth0-c2-r4-u13',
     'eth0-c2-r4-u17',
@@ -93,14 +93,25 @@ node 'kvm-compute01.openstack.tld',
     'eth0-c2-r4-u29',
     'eth0-c2-r4-u31',
     'eth0-c2-r4-u33',
-    'eth0-c2-r4-u35':{
-        class{'packstack::tweaks':}
+    'eth0-c2-r4-u35':
+    {
+#        class{'packstack::tweaks':}
 
-        package{'kernel':
-          ensure => '3.10.25-11.el6.centos.alt',
-          provider => 'rpm',
-          source   => 'http://hpc.fau.edu/repo/centos/6.5/xen4/x86_64/Packages/kernel-3.10.25-11.el6.centos.alt.x86_64.rpm',
-          require => Class['packstack::tweaks'],
+#        package{'kernel':
+#          ensure => '3.10.25-11.el6.centos.alt',
+#          provider => 'rpm',
+#          source   => 'http://hpc.fau.edu/repo/centos/6.5/xen4/x86_64/Packages/kernel-3.10.25-11.el6.centos.alt.x86_64.rpm',
+#          require => Class['packstack::tweaks'],
+#        }
+        package {['libvirt-python','libvirt']:
+          ensure => '0.10.2.8-9.el6.centos.alt',
+          before => File_line['libvirt-exclusions'],
+        }
+        file_line{'libvirt-exclusions':
+          path => '/etc/yum.conf',
+          line => 'exclude=libvirt*',
+          ensure => present,
+          before => Package['openstack-nova-compute', 'openstack-ceilometer-compute'],
         }
     }
     default:{
@@ -119,7 +130,21 @@ node 'kvm-compute01.openstack.tld',
     'kvm-compute03',
     'kvm-compute04',
     'kvm-compute05',
-    'kvm-compute06':
+    'kvm-compute06',
+    'eth0-c2-r4-u03',
+    'eth0-c2-r4-u05',
+    'eth0-c2-r4-u09',
+    'eth0-c2-r4-u11',
+    'eth0-c2-r4-u13',
+    'eth0-c2-r4-u17',
+    'eth0-c2-r4-u19',
+    'eth0-c2-r4-u23',
+    'eth0-c2-r4-u25',
+    'eth0-c2-r4-u27',
+    'eth0-c2-r4-u29',
+    'eth0-c2-r4-u31',
+    'eth0-c2-r4-u33',
+    'eth0-c2-r4-u35':
         {
 #          $data_interface = 'em2'
           $if_type = 'em'
@@ -141,7 +166,10 @@ node 'kvm-compute01.openstack.tld',
 #    }
   }
   $mgmt_interface = "${if_type}${if_start}"
-  $data_interface = "${if_type}${if_start + 1}"
+  $data_interface = $hostname ? {
+    /eth0-c2-r4-u\d\d/  =>  "${if_type}${if_start + 2}",
+    default             =>  "${if_type}${if_start + 1}",
+  }
   notify {"mgmt_interface = '${mgmt_interface}'":}
   notify {"data_interface = '${data_interface}'":}
 #  case $hostname {
@@ -194,7 +222,8 @@ node 'kvm-compute01.openstack.tld',
        file {'/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini':
          ensure  => file,
          owner   => 'root',
-         group   => 'neutron',
+#         group   => 'neutron',
+         group   => 'root',
          mode    => '0664',
          content => template('kvm/linuxbridge_conf.ini.erb'),
          require => File['/etc/neutron/plugins/linuxbridge'],
@@ -203,7 +232,8 @@ node 'kvm-compute01.openstack.tld',
        file {'/etc/neutron/plugin.ini':
          ensure  => link,
          owner   => 'root',
-         group   => 'neutron',
+#         group   => 'neutron',
+         group   => 'root',
          mode    => '0664',
          target  => '/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini',
          require => File['/etc/neutron'],
@@ -212,7 +242,8 @@ node 'kvm-compute01.openstack.tld',
        file {'/etc/neutron/neutron.conf':
          ensure  => file,
          owner   => 'root',
-         group   => 'neutron',
+#         group   => 'neutron',
+         group   => 'root',
          mode    => '0664',
          content => template('kvm/neutron.conf.erb'),
          require => File['/etc/neutron'],
@@ -221,7 +252,8 @@ node 'kvm-compute01.openstack.tld',
        file {'/etc/neutron/rootwrap.conf':
          ensure  => file,
          owner   => 'root',
-         group   => 'neutron',
+#         group   => 'neutron',
+         group   => 'root',
          mode    => '0644',
          content => template('kvm/rootwrap.conf.neutron.erb'),
          require => File['/etc/neutron'],
@@ -230,7 +262,8 @@ node 'kvm-compute01.openstack.tld',
        file {'/etc/neutron/policy.json':
          ensure  => file,
          owner   => 'root',
-         group   => 'neutron',
+#         group   => 'neutron',
+         group   => 'root',
          mode    => '0664',
          content => template('kvm/policy.json.erb'),
          require => File['/etc/neutron'],
@@ -340,7 +373,7 @@ node 'kvm-compute01.openstack.tld',
 #    source => "puppet:///modules/packstack/ifcfg-${data_interface}",
 #  }
   package {['openstack-nova-compute',
-            'openstack-selinux',
+#            'openstack-selinux',
             'openstack-neutron-openvswitch',
             'openstack-neutron-linuxbridge',
             'python-slip',
@@ -351,6 +384,7 @@ node 'kvm-compute01.openstack.tld',
             'yum-plugin-priorities',
             'system-config-firewall',
             'telnet',
+            'wget',
             'nrpe',
             'centos-release-xen',
             'openstack-ceilometer-compute'] :
@@ -376,6 +410,49 @@ node 'kvm-compute01.openstack.tld',
 #      Class['packstack'],
 #      ],
 #  }
+
+  case $hostname {
+    'eth0-c2-r4-u03',
+    'eth0-c2-r4-u05',
+    'eth0-c2-r4-u09',
+    'eth0-c2-r4-u11',
+    'eth0-c2-r4-u13',
+    'eth0-c2-r4-u17',
+    'eth0-c2-r4-u19',
+    'eth0-c2-r4-u23',
+    'eth0-c2-r4-u25',
+    'eth0-c2-r4-u27',
+    'eth0-c2-r4-u29',
+    'eth0-c2-r4-u31',
+    'eth0-c2-r4-u33',
+    'eth0-c2-r4-u35': {
+        file {"/etc/sysconfig/network-scripts/ifcfg-${data_interface}":
+        ensure  => file,
+        owner   => '0',
+        group   => '0',
+        mode    => '0644',
+        content => "BOOTPROTO=static
+DEVICE=${data_interface}
+TYPE=Ethernet
+PROMISC=yes
+USERCTL=no
+PEERDNS=no",
+      }
+
+
+#        package {'libvirt-python':
+#          ensure => '0.10.2.8-9.el6.centos.alt',
+#          before => File_line['libvirt-exclusions'],
+#        }
+#        file_line{'libvirt-exclusions':
+#          path => '/etc/yum.conf',
+#          line => 'exclude=libvirt*',
+#          ensure => present,
+#          before => Package['openstack-nova-compute', 'openstack-ceilometer-compute'],
+#        }
+      }
+    default: {}
+  }
 
 }
 

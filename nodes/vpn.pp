@@ -82,14 +82,18 @@ node /vpn.*/ {
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }
-  openvpn::client {'gabrielloewen':
+  openvpn::client {'alinserdean':
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }
-  openvpn::client {'mattneely':
-    server => 'hypervci',
-    remote_host => '64.119.130.115',
-  }
+#  openvpn::client {'gabrielloewen':
+#    server => 'hypervci',
+#    remote_host => '64.119.130.115',
+#  }
+#  openvpn::client {'mattneely':
+#    server => 'hypervci',
+#    remote_host => '64.119.130.115',
+#  }
   openvpn::client {'csilva':
     server => 'hypervci',
     remote_host => '64.119.130.115',
@@ -99,6 +103,14 @@ node /vpn.*/ {
     remote_host => '64.119.130.115',
   }
   openvpn::client {'lloydj':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'cbelu':
+    server => 'hypervci',
+    remote_host => '64.119.130.115',
+  }
+  openvpn::client {'lpetrut':
     server => 'hypervci',
     remote_host => '64.119.130.115',
   }
