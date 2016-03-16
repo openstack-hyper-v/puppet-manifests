@@ -17,36 +17,37 @@ node default {
 
   # This gets applied to everything
   case $kernel {
-   'Linux':{
-     notify {"supported kernel ${kernel} in our infrastructure":}
-     @@quartermaster::pxe::file {$macaddress: arp_type => $arp_type, host_macaddress => $host_macaddress,}
-     class {'basenode':}
-   }
-   'Windows':{
-     notify {"supported kernel ${kernel} in our infrastructure":}
-     class { 'windows_openssl': }
-     class { 'cloudbase_prep::wsman': require => Class['windows_openssl'],}
-
-     $q_ip = '10.21.7.22'
-     $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
-     file { "$nfs_location":
-       ensure => directory,
-     }
-     file { "$nfs_location\\${hostname}":
-       ensure => directory,
-       require => File["$nfs_location"],
-     }
-     exec {"${hostname}-facter":
-       command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
-     }
-     file { "$nfs_location\\${hostname}\\facter.yaml":
-       ensure  => file,
-       source  => 'C:\ProgramData\facter.yaml',
-       require => File["$nfs_location\\${hostname}"],
-       subscribe => Exec["${hostname}-facter"],
-     }
-   }
-   default:{ notify {"unsupported kernel ${kernel}":} }
+    'Linux':{
+      notify {"supported kernel ${kernel} in our infrastructure":}
+      @@quartermaster::pxe::file {$macaddress: arp_type => $arp_type, host_macaddress => $host_macaddress,}
+      class {'basenode':}
+    }
+    'Windows':{
+      notify {"supported kernel ${kernel} in our infrastructure":}
+      class { 'windows_openssl': }
+      class { 'cloudbase_prep::wsman': require => Class['windows_openssl'],}
+      $q_ip = '10.21.7.22'
+      $nfs_location = "\\\\${q_ip}\\nfs\\hosts"
+      file { "${nfs_location}":
+        ensure => directory,
+      }
+      file { "${nfs_location}\\${hostname}":
+        ensure  => directory,
+        require => File["${nfs_location}"],
+      }
+      exec {"${hostname}-facter":
+        command => "\"C:\\Program Files (x86)\\Puppet Labs\\Puppet\\bin\\facter.bat\" -py > C:\\ProgramData\\facter.yaml",
+      }
+      file { "${nfs_location}\\${hostname}\\facter.yaml":
+        ensure    => file,
+        source    => 'C:\ProgramData\facter.yaml',
+        require   => File["${nfs_location}\\${hostname}"],
+        subscribe => Exec["${hostname}-facter"],
+      }
+    }
+    default:{
+      notify {"unsupported kernel ${kernel}":}
+    }
   }
 }
 
@@ -76,7 +77,7 @@ node /^git.*/{
   class {'basenode':}
   class {'sensu':}
   class {'sensu_client_plugins': require => Class['sensu'],}
-  class {'gitlab_server': }
+  class {'gitlab_server':}
 }
 
 node /^(docker[0-9]).openstack.tld/{
@@ -147,7 +148,7 @@ node /ironic.*/{
   class {'sensu_client_plugins': require => Class['sensu'],}
 }
 
-node /sauron.*/{ 
+node /sauron.*/{
   class{'basenode':}
   class{'sensu_server':}
   class {'sensu_client_plugins': require => Class['sensu_server'],}
@@ -181,56 +182,44 @@ node /(001cc410b696.openstack.tld|001cc43c4dd6.openstack.tld|001cc474636c.openst
 #    config_hash => { 'root_password' => 'example' }
 #  }
   class { 'galera::server':
-    config_hash => {
-     'root_password' => 'ChangeMe',
+    config_hash        => {
+      'root_password' => 'ChangeMe',
     },
-    cluster_name => 'galera_cluster',
-    master_ip => false,
+    cluster_name       => 'galera_cluster',
+    master_ip          => false,
     wsrep_sst_username => 'ChangeMe',
     wsrep_sst_password => 'ChangeMe',
-    wsrep_sst_method => 'rsync',
- }
-
+    wsrep_sst_method   => 'rsync',
+  }
 }
 # End MySql Cluster
-
-
 node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
-
 #  $ad_domain_password    = hiera('ad_passwd',{}),
-
   File {
     source_permissions => ignore,
   }
-
   class {'windows_common':}
   class {'windows_common::configuration::disable_firewalls':}
   class {'windows_common::configuration::enable_auto_update':}
-
   class {'windows_common::configuration::ntp':
     before => Class['windows_openssl'],
   }
-
   class{'windows_freerdp':}
   class{'windows_sensu':
-    rabbitmq_password        => 'sensu',
-    rabbitmq_host            => "10.21.7.4",
-    subscriptions            => ["ActiveDirectory"],
+    rabbitmq_password => 'sensu',
+    rabbitmq_host     => '10.21.7.4',
+    subscriptions     => ['ActiveDirectory'],
   }
-
-  class {'windows_common::configuration::rdp':}
   class {'windows_openssl': }
   class {'windows_git': }
   class {'cloudbase_prep::wsman': require => Class['windows_openssl'],}
-  class{'sensu_client_plugins': require => Class['windows_sensu'],}
-
+  class {'sensu_client_plugins': require => Class['windows_sensu'],}
   reboot {'prepare_system':
     apply => finished,
   }
   reboot {'ad_installed':
     apply => finished,
   }
-
   windows_common::configuration::feature { 'Server-Gui-Shell':
     ensure => absent,
     notify => Reboot['prepare_system'],
@@ -243,61 +232,58 @@ node /(ad0.openstack.tld|ad1.openstack.tld|ad2.openstack.tld)/{
     ensure => present,
     notify => Reboot['prepare_system'],
   }
-
   windows_common::configuration::feature { 'RSAT-AD-Tools':
     ensure => present,
     notify => Reboot['prepare_system'],
   }
-
   windows_common::configuration::feature { 'AD-Domain-Services':
-    ensure => present,
+    ensure  => present,
     require => Windows_common::Configuration::Feature['DNS','RSAT-DNS-Server'],
-    notify => Reboot['prepare_system'],
+    notify  => Reboot['prepare_system'],
   }
   windows_common::configuration::feature { 'GPMC':
     ensure => present,
     notify => Reboot['prepare_system'],
   }
-
   case $fqdn {
     'ad0.openstack.tld':{
       notify{"My name is ${fqdn}":}
-      notify{"I am the primary domain controller":} warning('I am the primary ad domain controller')
+      notify{'I am the primary domain controller':} warning('I am the primary ad domain controller')
       class {'windows_domain_controller':
-        domain        => 'forest',
-        domainname    => 'ad.openstack.tld',
-        domainlevel   => '4',
-        forestlevel   => '4',
-        dsrmpassword  => 'H@rd24G3t',
-        notify => Reboot['ad_installed'],
+        domain       => 'forest',
+        domainname   => 'ad.openstack.tld',
+        domainlevel  => '4',
+        forestlevel  => '4',
+        dsrmpassword => 'H@rd24G3t',
+        notify       => Reboot['ad_installed'],
       }
     }
     'ad1.openstack.tld':{
       notify{"My name is ${fqdn}":}
-      notify{"I am the secondary domain controller":} warning('I am the secondary domain controller')
+      notify{'I am the secondary domain controller':} warning('I am the secondary domain controller')
       class {'domain_membership':
-        domain       => 'ad.openstack.tld',
-        username     => 'administrator',
-        password     => 'H@rd24G3t',
-#        force        => true,
-#        notify       => Reboot['prepare_system'],
+        domain   => 'ad.openstack.tld',
+        username => 'administrator',
+        password => 'H@rd24G3t',
+#       force    => true,
+#       notify   => Reboot['prepare_system'],
       }
 #      class {'windows_domain_controller::additional':
 #        userdomain => 'ad.openstack.tld',
-#        domainuser   => 'administrator',
+#        domainuser => 'administrator',
 #        password   => 'H@rd24G3t',
 #        notify     => Reboot['ad_installed'],
 #      }
     }
     'ad2.openstack.tld':{
-      notify{"I am the test domain controller":} warning('I am the test ad domain controller')
+      notify{'I am the test domain controller':} warning('I am the test ad domain controller')
       class {'windows_domain_controller':
-        domain        => 'forest',
-        domainname    => 'adtest.openstack.tld',
-        domainlevel   => '4',
-        forestlevel   => '4',
-        dsrmpassword  => 'H@rd24G3t',
-        notify => Reboot['ad_installed'],
+        domain       => 'forest',
+        domainname   => 'adtest.openstack.tld',
+        domainlevel  => '4',
+        forestlevel  => '4',
+        dsrmpassword => 'H@rd24G3t',
+        notify       => Reboot['ad_installed'],
       }
     }
   }
@@ -326,7 +312,6 @@ node 'eth0-c2-r3-u40.openstack.tld'{
   }
 }
 
-
 import 'nodes/log_host.pp'
 import 'nodes/quartermaster.pp'
 import 'nodes/jenkins.pp'
@@ -334,16 +319,13 @@ import 'nodes/vpn.pp'
 import 'nodes/frankenstein.pp'
 import 'nodes/zuul.pp'
 #import 'nodes/zuul-apache.pp'
-
 import 'nodes/build-host.pp'
-
 import 'nodes/hv-compute.pp'
 import 'nodes/kvm-compute.pp'
 import 'nodes/sandboxes.pp'
 import 'nodes/packstack_nodes.pp'
 import 'nodes/neutron.pp'
 import 'nodes/switches.pp'
-
 import 'nodes/logstash.pp'
 import 'nodes/pypi.pp'
 import 'nodes/download_host.pp'
